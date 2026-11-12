@@ -92,9 +92,9 @@ Uygulama TikTok şifrenizi istemez. Başka yayıncıya kendi anahtarınızı ver
 
 ## 5. Katılım ve hediye ayarları
 
-### Sohbetten ücretsiz piste çıkma
+### Karakter seçimi ve Gül ile piste çıkma
 
-Yeni kurulumda ücretsiz katılım açıktır. **3 · Karakter tercihi → Kadın / erkek yazan ücretsiz piste çıkabilsin** seçeneğini kontrol edip **Katılım ayarlarını kaydet** deyin.
+Yeni kurulumda **Gül → Piste çık** hazırdır ve ücretsiz katılım kapalıdır. İzleyici önce sohbetten karakterini seçer, ardından Gül göndererek piste çıkar.
 
 İzleyici aşağıdakilerden birini yazar:
 
@@ -106,7 +106,7 @@ erkek
 
 Büyük/küçük harf fark etmez. Bu sözcükler kişinin oyun karakteri tercihidir; profilinden cinsiyet tahmin edilmez. Yeni karakter seçimi için `kadın` / `erkek` kullanın; `katıl` tek başına karakter tercihi belirlemez.
 
-Ücretsiz katılımı kapatırsanız bu mesajlar yalnızca karakter tercihini seçer; piste giriş için **Piste çık** eylemine hediye eşleştirmeniz gerekir. Varsayılan **Seçim yapmayan kişi** kuralı “Hediyesini tut, seçimini bekle”dir; isterseniz varsayılan kadın veya erkek karakter seçebilirsiniz.
+Bu mesajlar yalnızca karakter tercihini seçer. Ücretsiz giriş isterseniz **3 · Karakter tercihi → Kadın / erkek yazan ücretsiz piste çıkabilsin** seçeneğini açıp **Katılım ayarlarını kaydet** deyin. Varsayılan **Seçim yapmayan kişi** kuralı “Hediyesini tut, seçimini bekle”dir; isterseniz varsayılan kadın veya erkek karakter seçebilirsiniz.
 
 Karakter seçmeden rol hediyesi atan kişinin isteği bekler. `kadın`/`erkek` yazınca bekleyen rolü açılır; yeniden hediye gerekmez. Birden fazla istek varsa gösterileri sıraya alınır ve kişinin kalıcı rolü son istediği rol olur. Mevcut VIP/müzisyen karakter tercihini değiştirince ücretsiz katılım mesajı onu zorla piste taşımaz.
 
@@ -118,15 +118,15 @@ Karakter seçmeden rol hediyesi atan kişinin isteği bekler. `kadın`/`erkek` y
 4. Her eylemin yanındaki listeden hediyesini seçin.
 5. **Hediye eşleşmelerini kaydet** deyin.
 
-Yeni kurulumda **Gül / Rose (#5655) → Para saç** hazırdır. **Piste çık** ve diğer eylemler eşleştirilmemiştir. Kullanılmayacak eylemi **Eşleştirilmedi · kapalı** bırakın. Aynı hediye iki eyleme bağlanamaz; değiştirmek için eski eylemden kaldırıp yeni eyleme seçin.
+Yeni kurulumda **Gül / Rose (#5655) → Piste çık** hazırdır. **Para saç** ve diğer eylemler eşleştirilmemiştir. Kullanılmayacak eylemi **Eşleştirilmedi · kapalı** bırakın. Aynı hediye iki eyleme bağlanamaz; değiştirmek için eski eylemden kaldırıp yeni eyleme seçin.
 
 Eşleşme **hediye kimliğiyle (ID)** yapılır; aynı jeton değerindeki başka bir hediye aynı eylemi tetiklemez. Listede görünen jeton bilgisi katalogdan gelir; gerçek hediye fiyatını ve kullanılabilirliğini TikTok belirler. Hediye seri paketleri tekrarlandığında aynı olay iki kez oynatılmaz.
 
 ### LIVE Studio'daki İzleyici Dilekleri
 
-TikTok/LIVE Studio hesabınızda **İzleyici Dilekleri** paneli varsa orada gösterdiğiniz hediye ve açıklamayı ÂLÂ'daki eşleşmeyle aynı yapın. Örneğin TikTok'ta Gül için “Para saç” yazıyorsa burada da Gül → Para saç olmalıdır. TikTok panelini kendi arayüzünde etkinleştirin.
+TikTok/LIVE Studio hesabınızda **İzleyici Dilekleri** paneli varsa orada gösterdiğiniz hediye ve açıklamayı ÂLÂ'daki eşleşmeyle aynı yapın. Örneğin TikTok'ta Gül için “Piste çık” yazıyorsa burada da Gül → Piste çık olmalıdır. TikTok panelini kendi arayüzünde etkinleştirin.
 
-Bu iki panel otomatik olarak birbirine ayar aktarmaz. TikTok paneli izleyiciye hediyeyi gösterir; ÂLÂ ise gelen hediye ID'sine göre oyunu çalıştırır. Yayın görüntüsünde kamera ve sohbete katılım bilgisi gösterilir; hediye açıklamalarını TikTok’un İzleyici Dilekleri panelinden sunabilirsiniz.
+Bu iki panel otomatik olarak birbirine ayar aktarmaz. TikTok paneli izleyiciye hediyeyi gösterir; ÂLÂ ise gelen hediye ID'sine göre oyunu çalıştırır. Yayın görüntüsünde kamera, “🌹 Piste çık · Gül” ve karakter seçimi bilgisi gösterilir; hediye açıklamalarını TikTok’un İzleyici Dilekleri panelinden sunabilirsiniz.
 
 ## 6. Webcam veya döngü video
 
@@ -202,7 +202,7 @@ Her yayın öncesi:
 5. ÂLÂ'da **Yayına bağlan** deyin. “Sunucu açılınca yayını bekle” açıksa otomatik başlamış olabilir.
 6. **Asıl yayını TikTok/LIVE Studio içinde siz başlatın.** Gerekirse İzleyici Dilekleri panelini de ayrıca başlatın.
 7. ÂLÂ'da bağlantı durumunun “Yayına bağlı” olmasını bekleyin.
-8. Başka bir hesapla `kadın` veya `erkek` yazıp katılımı kontrol edin. Gerçek hediye kontrolü yapacaksanız yalnızca seçtiğiniz eşleşmeyle deneyin.
+8. Başka bir hesapla `kadın` veya `erkek` yazıp karakter seçimini kontrol edin. Varsayılan ayarda giriş için Gül gerekir. Hediyesiz giriş denemesi için panelden ücretsiz katılımı açabilirsiniz.
 
 Yayını bitirirken önce TikTok/LIVE Studio'da yayını sonlandırın. Ardından ÂLÂ'da **Bağlantıyı kes** deyip terminalde `Ctrl+C` kullanabilirsiniz. **Geceyi sonlandır** hediyesi yalnızca gönderenin adını ve bir bildirim gösterir; yayını otomatik kapatmaz.
 
@@ -298,7 +298,7 @@ Bu sürüm sunucuyu **yalnızca `127.0.0.1` üzerinde** açar. Telefonda aynı a
 | Müzik duyulmuyor | Dosya yüklü/çalıyor mu? Yayın penceresine bir kez tıklayın. Ses seviyesi ve OBS/LIVE Studio ses yakalama kaynağını kontrol edin. |
 | Müzik iki kez geliyor | Birden fazla yayın penceresini veya stüdyo ses dinlemesini kapatın; aynı uygulamayı iki ses kaynağından yakalamayın. |
 | Video sesi geliyor | ÂLÂ içindeki video sessizdir. Aynı videoyu yayın programına ayrı sesli medya kaynağı olarak eklediyseniz o kaynağı kontrol edin. |
-| `kadın` / `erkek` yazınca gelmiyor | ÂLÂ doğru yayıncı hesabına bağlı mı? Ücretsiz katılım açık mı? Pist doluysa bekleme sırasına bakın. `katıl` yerine `kadın`/`erkek` kullanın. |
+| `kadın` / `erkek` yazınca gelmiyor | Varsayılan ayarda bu mesaj yalnızca karakteri seçer; giriş için Gül gerekir. ÂLÂ doğru hesaba bağlı mı? Ücretsiz giriş istiyorsanız panelden açın. Pist doluysa bekleme sırasına bakın. |
 | Hediye rolü çalışmıyor | İki tarafta aynı hediye ID'si seçili mi? Eşleşmeler kaydedildi mi? Kişi karakter seçimi bekliyor mu? Başka gösteri sürüyorsa sırada olabilir. |
 | Katalog yüklenmiyor | Euler anahtarı, internet ve hizmet erişimini kontrol edin; anahtarı önce kaydedin. |
 | Euler anahtarı geçersiz / bağlantı limiti | Euler hesabında anahtarın ve erişimin etkinliğini/kotasını kontrol edin. Aynı anahtarla gereksiz paralel bağlantıları kapatın. |

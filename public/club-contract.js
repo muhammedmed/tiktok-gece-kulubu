@@ -1,5 +1,5 @@
 export const ROLE_LABELS={dance:'Piste çık',vip:'VIP ol',dancer:'Dansöz ol',saz:'Sazcı ol',drum:'Darbukacı ol',dj:'DJ ol',waiter:'Garson ol',solo:'Sahne Şovu',money:'Para saç',confetti:'Konfeti patlat',hype:'Coştur',endnight:'Geceyi sonlandır'};
-export const DEFAULT_SETTINGS={handle:'',autoConnect:false,defaultGender:'ask',chatJoin:true,showGuide:true,cameraMode:'off',cameraSize:26,videoVersion:0,musicVersion:0,musicPlaying:false,musicVolume:.6,assignments:{money:{id:'5655',name:'Gül / Rose'}}};
+export const DEFAULT_SETTINGS={handle:'',autoConnect:false,defaultGender:'ask',chatJoin:false,showGuide:true,cameraMode:'off',cameraSize:26,videoVersion:0,musicVersion:0,musicPlaying:false,musicVolume:.6,assignments:{dance:{id:'5655',name:'Gül / Rose'}}};
 export function validateSettings(value,previous=DEFAULT_SETTINGS){
  const s={...previous,...value};s.handle=String(s.handle||'').trim().replace(/^@/,'');if(s.handle&&!/^[\w.]{1,24}$/.test(s.handle))throw Error('Geçerli TikTok kullanıcı adı gir.');
  for(const key of ['autoConnect','chatJoin','showGuide','musicPlaying'])if(typeof s[key]!=='boolean')throw Error('Geçersiz ayar.');

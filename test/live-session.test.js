@@ -2,10 +2,14 @@ import {MAX_DANCERS} from '../public/club-layout.js';
 import test from 'node:test';import assert from 'node:assert/strict';
 import {ClubSession} from '../src/session.js';import {eventDecoder} from '../src/live.js';import {validateSettings,DEFAULT_SETTINGS,giftRole} from '../public/club-contract.js';
 const settings=()=>validateSettings({...DEFAULT_SETTINGS,handle:'host',chatJoin:false,assignments:{dance:{id:'5655',name:'Rose'},saz:{id:'900',name:'Example'},vip:{id:'901',name:'Example VIP'}}});
-test('fresh install uses free chat entry and maps Rose to money without an account or API key',()=>{
- const s=new ClubSession(DEFAULT_SETTINGS);assert.equal(s.settings.handle,'');assert.equal(s.settings.autoConnect,false);assert.equal(giftRole(s.settings,{giftId:'5655'}),'money');
- s.accept({type:'chat',id:'new',name:'New viewer',text:'kadın'});assert.equal(s.players.get('new').role,'dance');
- s.accept({type:'gift',id:'giver',name:'Giver',giftId:'5655'});assert.equal(s.players.has('giver'),false);assert.equal(s.events.at(-1).role,'money');
+test('fresh install remembers a chosen character and requires a Rose to enter the floor',()=>{
+ const s=new ClubSession(DEFAULT_SETTINGS);assert.equal(s.settings.handle,'');assert.equal(s.settings.autoConnect,false);assert.equal(s.settings.chatJoin,false);assert.equal(giftRole(s.settings,{giftId:'5655'}),'dance');
+ s.accept({type:'chat',id:'new',name:'New viewer',text:'kadın'});assert.equal(s.players.size,0);
+ s.accept({type:'chat',id:'new',name:'New viewer',text:'katıl'});assert.equal(s.players.size,0);
+ s.accept({type:'gift',id:'new',name:'New viewer',giftId:'5655'});assert.equal(s.players.get('new').role,'dance');assert.equal(s.players.get('new').gender,'female');
+ s.accept({type:'gift',id:'giver',name:'Giver',giftId:'5655'});assert.equal(s.players.has('giver'),false);assert.equal(s.pending.has('giver'),true);
+ s.accept({type:'chat',id:'giver',name:'Giver',text:'erkek'});assert.equal(s.pending.size,0);assert.equal(s.players.get('giver').gender,'male');assert.equal(s.players.get('giver').role,'dance');
+ assert.equal(s.events.some(e=>e.role==='money'),false);
 });
 test('free gender commands enter the floor once and preserve existing paid roles',()=>{
  const s=new ClubSession({...settings(),chatJoin:true});

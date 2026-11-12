@@ -1,6 +1,6 @@
 # ÂLÂ — TikTok Gece Kulübü
 
-TikTok LIVE sohbet ve hediyeleriyle çalışan, bilgisayarda yerel olarak açılan 3D gece kulübü. İzleyiciler `kadın` / `erkek` yazarak piste katılır; hediyelerle VIP, müzisyen, DJ, garson ve dansöz rollerine geçer veya sahne efektleri başlatır. Kamera girişleri, rolleri ve gösterileri otomatik takip eder.
+TikTok LIVE sohbet ve hediyeleriyle çalışan, bilgisayarda yerel olarak açılan 3D gece kulübü. İzleyiciler `kadın` / `erkek` yazarak karakterini seçer, Gül göndererek piste katılır; hediyelerle VIP, müzisyen, DJ, garson ve dansöz rollerine geçer veya sahne efektleri başlatır. Kamera girişleri, rolleri ve gösterileri otomatik takip eder.
 
 **Pist kapasitesi 66 kişi.** VIP locaları, sahne rolleri ve dekor karakterleri bu pist sınırından ayrıdır. Her yayıncı kendi TikTok hesabını, Euler API anahtarını, müziğini ve kamera videosunu kullanır.
 
@@ -35,8 +35,8 @@ Sunucu terminalini yayın boyunca açık tutun. `index.html` dosyasını çift t
 ## İlk açılışta hangi ayarlar var?
 
 - TikTok kullanıcı adı ve Euler anahtarı **boştur**; yayıncının kendisi girer.
-- `kadın` / `kadin` veya `erkek` yazan kişi ücretsiz piste katılabilir. Büyük/küçük harf fark etmez.
-- **Gül / Rose (#5655) → Para saç** eşleştirmesi hazırdır.
+- `kadın` / `kadin` veya `erkek` karakteri seçer; Gül piste çıkarır. Büyük/küçük harf fark etmez. Önce Gül gönderen kişinin seçimi beklenir; yeniden hediye gerekmez.
+- **Gül / Rose (#5655) → Piste çık** eşleştirmesi hazırdır.
 - Diğer hediyeler seçilene kadar kapalıdır; **Hediye → eylem** bölümünden belirlenir.
 - Webcam/video ve müzik hazır gelmez; kendi dosyalarınızı veya kameranızı eklersiniz.
 - Otomatik TikTok bağlantısı kapalı başlar. Sahne, yayın açılmadan yerel olarak denenebilir.
@@ -45,7 +45,8 @@ Sunucu terminalini yayın boyunca açık tutun. `index.html` dosyasını çift t
 
 | Özellik | Davranış |
 | --- | --- |
-| Ücretsiz katılım | Sohbette `kadın` / `erkek`; dolu pistte bekleme sırası |
+| Piste giriş | Sohbette `kadın` / `erkek` ile karakter seçimi, ardından Gül; dolu pistte bekleme sırası |
+| Ücretsiz katılım | İstenirse panelden açılır; varsayılan olarak kapalıdır |
 | Aktiflik | 150 saniye sohbet/beğeni/hediye etkileşimi olmayan ücretsiz pist katılımcısı çıkarılır |
 | Korunan roller | VIP, müzisyenler ve ücretli rol alanlar otomatik çıkarılmaz; yayıncı panelden kaldırabilir |
 | VIP | 4 loca, toplam 12 koltuk |

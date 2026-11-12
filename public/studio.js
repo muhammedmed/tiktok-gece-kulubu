@@ -36,6 +36,8 @@ export function setupStudio(onState){
  document.addEventListener('pointerdown',()=>{if(state)applyMusic();});
  function receive(s){if(isOlderState(s,state))return;state=s;const st=s.settings;const signature=JSON.stringify(st);if(signature!==lastSettings){lastSettings=signature;for(const g of Object.values(st.assignments))catalog.set(g.id,{...catalog.get(g.id),...g});fillGifts();for(const [role,select]of selections)select.value=st.assignments[role]?.id||'';
   $('liveHandle').value=st.handle;$('autoConnect').checked=st.autoConnect;$('defaultGender').value=st.defaultGender;$('chatJoin').checked=st.chatJoin;$('cameraMode').value=st.cameraMode;$('cameraSize').value=st.cameraSize;$('volume').value=st.musicVolume;
+  const entry=st.assignments.dance,entryGuide=$('entryGift');entryGuide.hidden=st.chatJoin||!entry;
+  entryGuide.textContent=entry?(entry.id==='5655'?'🌹 Piste çık · Gül':'🎁 Piste çık · '+entry.name):'';
   $('joinHint').querySelector('strong').textContent=st.chatJoin?'Ücretsiz piste çık':'Karakterini seç';applyCamera(st);applyMusic();
  }
  $('floorStatus').textContent='Pist: '+s.players.filter(p=>p.role==='dance').length+'/'+(s.capacity?.floor||MAX_DANCERS)+' · Sırada: '+(s.waiting?.length||0);
