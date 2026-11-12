@@ -92,9 +92,9 @@ Uygulama TikTok şifrenizi istemez. Başka yayıncıya kendi anahtarınızı ver
 
 ## 5. Katılım ve hediye ayarları
 
-### Karakter seçimi ve Gül ile piste çıkma
+### Karakter seçimi, Gül veya 200 beğeniyle piste çıkma
 
-Yeni kurulumda **Gül → Piste çık** hazırdır ve ücretsiz katılım kapalıdır. İzleyici önce sohbetten karakterini seçer, ardından Gül göndererek piste çıkar.
+Yeni kurulumda **Gül → Piste çık** hazırdır; yalnızca sohbet mesajıyla giriş kapalıdır. İzleyici önce sohbetten karakterini seçer, ardından Gül göndererek veya kişi başına 200 beğeniye ulaşarak piste çıkar.
 
 İzleyici aşağıdakilerden birini yazar:
 
@@ -106,9 +106,20 @@ erkek
 
 Büyük/küçük harf fark etmez. Bu sözcükler kişinin oyun karakteri tercihidir; profilinden cinsiyet tahmin edilmez. Yeni karakter seçimi için `kadın` / `erkek` kullanın; `katıl` tek başına karakter tercihi belirlemez.
 
-Bu mesajlar yalnızca karakter tercihini seçer. Ücretsiz giriş isterseniz **3 · Karakter tercihi → Kadın / erkek yazan ücretsiz piste çıkabilsin** seçeneğini açıp **Katılım ayarlarını kaydet** deyin. Varsayılan **Seçim yapmayan kişi** kuralı “Hediyesini tut, seçimini bekle”dir; isterseniz varsayılan kadın veya erkek karakter seçebilirsiniz.
+Bu mesajlar yalnızca karakter tercihini seçer. Ücretsiz giriş isterseniz **3 · Karakter tercihi → Kadın / erkek yazan ücretsiz piste çıkabilsin** seçeneğini açıp **Katılım ayarlarını kaydet** deyin. Varsayılan **Seçim yapmayan kişi** kuralı “Giriş hakkını tut, seçimini bekle”dir; isterseniz varsayılan kadın veya erkek karakter seçebilirsiniz.
 
 Karakter seçmeden rol hediyesi atan kişinin isteği bekler. `kadın`/`erkek` yazınca bekleyen rolü açılır; yeniden hediye gerekmez. Birden fazla istek varsa gösterileri sıraya alınır ve kişinin kalıcı rolü son istediği rol olur. Mevcut VIP/müzisyen karakter tercihini değiştirince ücretsiz katılım mesajı onu zorla piste taşımaz.
+
+### Beğeniyle katılım
+
+**3 · Karakter tercihi → Piste giriş için kişi başına beğeni** varsayılan olarak **200**. Hedefi değiştirip **Katılım ayarlarını kaydet** deyin; **0** bu yöntemi kapatır. Gül ile giriş ayrı bir alternatif olarak çalışmaya devam eder.
+
+- Her izleyicinin gelen beğeni paketleri kullanıcı kimliğine göre toplanır. Örneğin aynı kişinin 60 + 80 + 60 beğenisi onu hedefe ulaştırır; başka kişilerin beğenileri eklenmez.
+- Yayının toplam beğenisi kullanılmaz. Aynı mesaj kimliğiyle tekrar gelen paket iki kez sayılmaz. [TikTok bağlantı dokümanına göre](https://ttlc.docs.isaackogan.com/events/chat-and-audience/#like) beğeniler paketler halinde gelebilir ve bazı güncellemeler iletilmeyebilir; telefondaki her dokunuşun sayılacağı garantisi yoktur.
+- Önce hedefi tamamlayan kişi `kadın` / `erkek` seçimi bekler. Tekrar beğeni veya hediye gerekmez. Dolu pistte bekleme sırasına girer.
+- **Beğeniyle giriş sayacı** bölümünde hedefe en yakın 20 kişinin ilerlemesi görünür. Giriş hakkı verilince sayaç tüketilir. Sahnedeki, karakter seçimi bekleyen veya sıradaki kişilerin beğenileri yeni giriş/rol değişimi başlatmaz.
+- Beğeniyle girenler normal 150 saniyelik aktiflik kuralına tabidir; hediye ile alınmış rollerin koruması değişmez. Pistten çıkmış kişi yeniden 200 beğeni biriktirerek veya Gül göndererek dönebilir.
+- Sayım oyun sunucusu açıkken gelen olaylardan başlar. Tarayıcıyı yenilemek sayacı sıfırlamaz; sunucuyu/oyun oturumunu sıfırlamak veya hedefi değiştirmek tamamlanmamış sayaçları sıfırlar. Önceden tamamlanmış, karakter seçimi bekleyen giriş hakları yalnızca hedef değişti diye silinmez.
 
 ### Hediye eşleştirme
 
@@ -126,7 +137,7 @@ Eşleşme **hediye kimliğiyle (ID)** yapılır; aynı jeton değerindeki başka
 
 TikTok/LIVE Studio hesabınızda **İzleyici Dilekleri** paneli varsa orada gösterdiğiniz hediye ve açıklamayı ÂLÂ'daki eşleşmeyle aynı yapın. Örneğin TikTok'ta Gül için “Piste çık” yazıyorsa burada da Gül → Piste çık olmalıdır. TikTok panelini kendi arayüzünde etkinleştirin.
 
-Bu iki panel otomatik olarak birbirine ayar aktarmaz. TikTok paneli izleyiciye hediyeyi gösterir; ÂLÂ ise gelen hediye ID'sine göre oyunu çalıştırır. Yayın görüntüsünde kamera, “🌹 Piste çık · Gül” ve karakter seçimi bilgisi gösterilir; hediye açıklamalarını TikTok’un İzleyici Dilekleri panelinden sunabilirsiniz.
+Bu iki panel otomatik olarak birbirine ayar aktarmaz. TikTok paneli izleyiciye hediyeyi gösterir; ÂLÂ ise gelen hediye ID'sine göre oyunu çalıştırır. Yayın görüntüsünde kamera, “Piste çık · 🌹 Gül veya 200 beğeni” ve karakter seçimi bilgisi gösterilir; hediye açıklamalarını TikTok’un İzleyici Dilekleri panelinden sunabilirsiniz.
 
 ## 6. Webcam veya döngü video
 
@@ -202,7 +213,7 @@ Her yayın öncesi:
 5. ÂLÂ'da **Yayına bağlan** deyin. “Sunucu açılınca yayını bekle” açıksa otomatik başlamış olabilir.
 6. **Asıl yayını TikTok/LIVE Studio içinde siz başlatın.** Gerekirse İzleyici Dilekleri panelini de ayrıca başlatın.
 7. ÂLÂ'da bağlantı durumunun “Yayına bağlı” olmasını bekleyin.
-8. Başka bir hesapla `kadın` veya `erkek` yazıp karakter seçimini kontrol edin. Varsayılan ayarda giriş için Gül gerekir. Hediyesiz giriş denemesi için panelden ücretsiz katılımı açabilirsiniz.
+8. Başka bir hesapla `kadın` veya `erkek` yazıp karakter seçimini kontrol edin. Varsayılan ayarda giriş için Gül veya kullanıcıya ait 200 beğeni gerekir. Hediyesiz giriş denemesi için panelden ücretsiz katılımı açabilirsiniz.
 
 Yayını bitirirken önce TikTok/LIVE Studio'da yayını sonlandırın. Ardından ÂLÂ'da **Bağlantıyı kes** deyip terminalde `Ctrl+C` kullanabilirsiniz. **Geceyi sonlandır** hediyesi yalnızca gönderenin adını ve bir bildirim gösterir; yayını otomatik kapatmaz.
 
@@ -298,7 +309,7 @@ Bu sürüm sunucuyu **yalnızca `127.0.0.1` üzerinde** açar. Telefonda aynı a
 | Müzik duyulmuyor | Dosya yüklü/çalıyor mu? Yayın penceresine bir kez tıklayın. Ses seviyesi ve OBS/LIVE Studio ses yakalama kaynağını kontrol edin. |
 | Müzik iki kez geliyor | Birden fazla yayın penceresini veya stüdyo ses dinlemesini kapatın; aynı uygulamayı iki ses kaynağından yakalamayın. |
 | Video sesi geliyor | ÂLÂ içindeki video sessizdir. Aynı videoyu yayın programına ayrı sesli medya kaynağı olarak eklediyseniz o kaynağı kontrol edin. |
-| `kadın` / `erkek` yazınca gelmiyor | Varsayılan ayarda bu mesaj yalnızca karakteri seçer; giriş için Gül gerekir. ÂLÂ doğru hesaba bağlı mı? Ücretsiz giriş istiyorsanız panelden açın. Pist doluysa bekleme sırasına bakın. |
+| `kadın` / `erkek` yazınca gelmiyor | Varsayılan ayarda bu mesaj yalnızca karakteri seçer; giriş için Gül veya kullanıcıya ait 200 beğeni gerekir. ÂLÂ doğru hesaba bağlı mı? Ücretsiz giriş istiyorsanız panelden açın. Pist doluysa bekleme sırasına bakın. |
 | Hediye rolü çalışmıyor | İki tarafta aynı hediye ID'si seçili mi? Eşleşmeler kaydedildi mi? Kişi karakter seçimi bekliyor mu? Başka gösteri sürüyorsa sırada olabilir. |
 | Katalog yüklenmiyor | Euler anahtarı, internet ve hizmet erişimini kontrol edin; anahtarı önce kaydedin. |
 | Euler anahtarı geçersiz / bağlantı limiti | Euler hesabında anahtarın ve erişimin etkinliğini/kotasını kontrol edin. Aynı anahtarla gereksiz paralel bağlantıları kapatın. |

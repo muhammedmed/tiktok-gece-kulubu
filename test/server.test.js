@@ -31,3 +31,20 @@ test('studio persists credentials privately, broadcasts real decoded events and 
  const partial=await fetch(base+'/media/video',{headers:{Range:'bytes=0-3'}});assert.equal(partial.status,206);assert.equal(await partial.text(),'test');assert.equal(app.snapshot().settings.cameraMode,'video');
  await request({action:'disconnect'});assert.equal(stopped,true);assert.equal((await readFile(path.join(dataDir,'settings.json'),'utf8')).includes('test-secret-only'),true);
 });
+
+test('like batches expose per-viewer progress, persist the target and join after the selected threshold',async t=>{
+ const dataDir=await mkdtemp(path.join(os.tmpdir(),'ala-likes-'));let feed;
+ const app=await createClubServer({dataDir,connectLive:opts=>{const decode=eventDecoder(opts.canCue);feed=p=>{const e=decode(p);if(e)opts.onEvent(e);};opts.onStatus('live','Mock likes');return()=>{};}});
+ await new Promise(resolve=>app.server.listen(0,'127.0.0.1',resolve));
+ t.after(async()=>{await app.close();await rm(dataDir,{recursive:true,force:true});});
+ await app.control({action:'settings',settings:{handle:'likeshost',likeJoinCount:200},key:'local-likes-test'});await app.control({action:'connect'});
+ feed({type:'WebcastChatMessage',data:{user:{id:'a',nickname:'Ada'},content:'kadın',common:{msgId:'chat-a'}}});
+ const packet=(msgId,count)=>({type:'WebcastLikeMessage',data:{user:{id:'a',nickname:'Ada'},count,total:999999,common:{msgId}}});
+ feed(packet('one','199'));let state=await (await fetch('http://127.0.0.1:'+app.server.address().port+'/api/state')).json();
+ assert.deepEqual(state.likeProgress,[{id:'a',name:'Ada',count:199}]);assert.equal(state.players.length,0);
+ feed(packet('two','1'));assert.equal(app.snapshot().players[0].gender,'female');assert.equal(app.snapshot().likeProgress.length,0);
+ feed({type:'WebcastLikeMessage',data:{user:{id:'b',nickname:'B'},count:50,common:{msgId:'b-one'}}});
+ await app.control({action:'settings',settings:{likeJoinCount:0}});assert.equal(app.snapshot().likeProgress.length,0);
+ assert.equal(JSON.parse(await readFile(path.join(dataDir,'settings.json'),'utf8')).settings.likeJoinCount,0);
+ assert.equal(app.snapshot().players.length,1);
+});

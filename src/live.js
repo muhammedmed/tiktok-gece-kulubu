@@ -61,7 +61,12 @@ export function eventDecoder(canCue = () => true, catalog = new Map()) {
       event.text = String(data.content || data.comment || '').slice(0, 256);
       event.username = String(user.displayId || user.uniqueId || event.name).slice(0, 64);
     }
-    if (type === 'like') event.amount = data.count ?? data.likeCount;
+    if (type === 'like') {
+      // count is this user's batch; total/totalLikeCount is the whole room.
+      const value = data.count ?? data.likeCount;
+      const count = typeof value === 'number' || (typeof value === 'string' && /^\d+$/.test(value)) ? Number(value) : NaN;
+      if (Number.isSafeInteger(count) && count > 0) event.amount = count;
+    }
     const giftType = data.gift?.type ?? data.giftDetails?.giftType ?? data.giftType;
     if (type === 'gift') {
       event.giftId = String(data.giftId || data.gift?.id || data.giftDetails?.giftId || '');

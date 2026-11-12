@@ -323,7 +323,7 @@ function applyNetwork(s){
   if(event&&!p.solo)focus(p,data.role);
  }
  reconcileStageDancers();
- for(const e of fresh){if(e.type==='role'&&!e.automatic&&(e.paid||e.role!=='dance')){const data=roleEventPlayer(e,s.players);if(data)enqueueRole(e,data);continue;}if(e.type==='queued')studio.queueNotice(e.name,e.position);if(e.type==='choose')studio.notice(e.name);if(e.type==='effect'){if(e.role==='solo'){enqueueSolo(e);continue;}if(e.role==='money'){enqueueMoney(e);continue;}if(e.role==='hype'){enqueueHype(e);continue;}if(e.role==='endnight'){$('endNightName').textContent=e.name;$('endNightNotice').hidden=false;endNightUntil=time+15;continue;}if(e.role==='confetti')enqueueConfetti(e);}}
+ for(const e of fresh){if(e.type==='role'&&!e.automatic&&(e.paid||e.role!=='dance')){const data=roleEventPlayer(e,s.players);if(data)enqueueRole(e,data);continue;}if(e.type==='queued')studio.queueNotice(e.name,e.position);if(e.type==='choose')studio.notice(e.name,e.reason);if(e.type==='effect'){if(e.role==='solo'){enqueueSolo(e);continue;}if(e.role==='money'){enqueueMoney(e);continue;}if(e.role==='hype'){enqueueHype(e);continue;}if(e.role==='endnight'){$('endNightName').textContent=e.name;$('endNightNotice').hidden=false;endNightUntil=time+15;continue;}if(e.role==='confetti')enqueueConfetti(e);}}
  // Process chat after all role/effect shots so gifts retain camera priority.
  for(const e of fresh)if(e.type==='chat')chatCamera.focus(people.find(p=>p.viewerId===e.id),queue,time,()=>{cameraCut=true;});
  lastSequence=s.seq;

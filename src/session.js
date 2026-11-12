@@ -7,11 +7,25 @@ import {MAX_GUESTS,MAX_DANCERS,MAX_VIP,MAX_STAGE_DANCERS,DANCE_IDLE_MS,MAX_WAITI
 function presentationPlayer(player){return player?Object.freeze({...player,...(player.chat?{chat:Object.freeze({...player.chat})}:{})}):undefined;}
 export class ClubSession{
  constructor(settings,preferences={},now=Date.now){this.settings=settings;this.preferences=preferences;this.now=now;this.reset();}
- reset(){this.epoch=randomUUID();this.players=new Map();this.pending=new Map();this.profiles=new Map();this.waitlist=new Map();this.activityPausedAt=null;this.events=[];this.sequence=0;this.roleSequence=0;this.variant=0;this.mode='preview';this.notices=[];}
+ reset(){this.epoch=randomUUID();this.players=new Map();this.pending=new Map();this.profiles=new Map();this.likeProgress=new Map();this.waitlist=new Map();this.activityPausedAt=null;this.events=[];this.sequence=0;this.roleSequence=0;this.variant=0;this.mode='preview';this.notices=[];}
+ countLikes(event){
+  const target=this.settings.likeJoinCount??200,id=String(event.id||''),amount=event.amount;
+  if(!target||!id||!Number.isSafeInteger(amount)||amount<=0)return;
+  // Likes must never replace an existing/queued paid role or replay its camera shot.
+  if(this.players.has(id)||this.pending.has(id)||this.waitlist.has(id)){this.likeProgress.delete(id);return;}
+  const count=Math.min(target,(this.likeProgress.get(id)?.count||0)+Math.min(amount,target));
+  this.sequence++;this.likeProgress.delete(id);this.likeProgress.set(id,{id,name:String(event.name||id).slice(0,32),count});
+  if(this.likeProgress.size>2000)this.likeProgress.delete(this.likeProgress.keys().next().value);
+  if(count<target)return;
+  this.assign({...event,likeEntry:true},'dance');
+  if(this.players.has(id)||this.pending.has(id)||this.waitlist.has(id)){
+   this.likeProgress.delete(id);this.note(event.name+' · '+target+' beğeniyle piste giriş hakkı kazandı.');
+  }
+ }
  touch(id){for(const records of [this.players,this.waitlist]){const p=records.get(String(id));if(p)p.lastActiveAt=this.now();}}
  pauseActivity(){this.activityPausedAt??=this.now();}
  resumeActivity(){if(this.activityPausedAt===null)return;const elapsed=Math.max(0,this.now()-this.activityPausedAt);for(const records of [this.players,this.waitlist])for(const p of records.values())p.lastActiveAt=Math.min(this.now(),(p.lastActiveAt??this.activityPausedAt)+elapsed);this.activityPausedAt=null;}
- queueDance(event){const id=String(event.id);if(!this.waitlist.has(id)&&this.waitlist.size>=MAX_WAITING&&!event.returningFromStage){this.note('Pist ve bekleme sırası dolu.');return;}const previous=this.waitlist.get(id);this.waitlist.set(id,{...previous,...event,id,queuedAt:previous?.queuedAt??this.now(),lastActiveAt:this.now()});this.emit('queued',{id,name:event.name,position:[...this.waitlist.keys()].indexOf(id)+1});this.note(event.name+' · Pist dolu; boşalan yere otomatik alınacak.');}
+ queueDance(event){const id=String(event.id);if(!this.waitlist.has(id)&&this.waitlist.size>=MAX_WAITING&&!event.returningFromStage){this.note('Pist ve bekleme sırası dolu.');return;}const previous=this.waitlist.get(id);this.likeProgress.delete(id);this.waitlist.set(id,{...previous,...event,id,queuedAt:previous?.queuedAt??this.now(),lastActiveAt:this.now()});this.emit('queued',{id,name:event.name,position:[...this.waitlist.keys()].indexOf(id)+1});this.note(event.name+' · Pist dolu; boşalan yere otomatik alınacak.');}
  sweepInactive(){
   if(this.mode==='preview'||this.activityPausedAt!==null)return false;
   let changed=false;const cutoff=this.now()-DANCE_IDLE_MS;
@@ -47,23 +61,24 @@ export class ClubSession{
   const paid=Boolean(event.idleProtected||['gift','giftCue'].includes(event.type));
   if(['money','confetti','hype','endnight'].includes(role)){this.emit('effect',{id,name:String(event.name||id).slice(0,32),role,paid,...(role==='money'?{avatar:event.avatar||this.players.get(id)?.avatar||'',gender:this.players.get(id)?.gender||this.preferences[this.preferenceKey(id)]||(['female','male'].includes(this.settings.defaultGender)?this.settings.defaultGender:'male')}:{})});this.note(event.name+' · '+ROLE_LABELS[role]);return;}
   const gender=role==='dancer'?'female':this.preferences[this.preferenceKey(id)]||(['female','male'].includes(this.settings.defaultGender)?this.settings.defaultGender:event.returningFromStage?event.gender:null);
-  if(!gender){if(this.pending.size>=100&&!this.pending.has(id)){this.note('Karakter seçimi bekleyenler dolu.');return;}const previous=this.pending.get(id),request={...event,role};this.pending.set(id,{...request,requests:[...(previous?.requests||(previous?[previous]:[])),request]});this.emit('choose',{id,name:event.name});this.note(event.name+': hediye alındı; kadın veya erkek yazması bekleniyor.');return;}
+  if(!gender){if(this.pending.size>=100&&!this.pending.has(id)){this.note('Karakter seçimi bekleyenler dolu.');return;}const previous=this.pending.get(id),request={...event,role};this.pending.set(id,{...request,requests:[...(previous?.requests||(previous?[previous]:[])),request]});this.likeProgress.delete(id);this.emit('choose',{id,name:event.name,reason:event.likeEntry?'likes':'gift'});this.note(event.name+': '+(event.likeEntry?'beğeni hedefi tamamlandı':'hediye alındı')+'; kadın veya erkek yazması bekleniyor.');return;}
   if(role==='solo'){if(!this.players.has(id))this.assign({...event,soloRequested:true},'dance');else {if(event.idleProtected)this.players.get(id).idleProtected=true;this.emit('effect',{id,name:this.players.get(id).name,role:'solo',paid,player:presentationPlayer(this.players.get(id))});}return;}
   let p=this.players.get(id),slot=this.slot(role,id);
   if(role==='dancer'&&slot===undefined){const old=[...this.players.values()].filter(x=>x.role==='dancer'&&x.id!==id).sort((a,b)=>(a.roleOrder??a.revision)-(b.roleOrder??b.revision))[0];if(old){slot=old.slot;this.returnStageDancer(old,p);}}
   if(!p&&this.players.size>=MAX_GUESTS){if(role==='dance')this.queueDance(event);else this.note(event.name+': salon kapasitesi dolu.');return;}
   if(slot===undefined){if(role==='dance')this.queueDance(event);else this.note(event.name+': '+ROLE_LABELS[role]+' alanı dolu.');return;}
   if(['saz','drum','dj'].includes(role)){const old=[...this.players.values()].find(x=>x.role===role&&x.id!==id);if(old){let next=this.slot('dance',old.id),nextRole='dance';if(next===undefined){next=this.slot('vip',old.id);nextRole='vip';}if(next===undefined){this.note('Önceki müzisyen için pist ve VIP dolu.');return;}old.role=nextRole;old.slot=next;old.roleSince=this.now();old.roleOrder=++this.roleSequence;old.lastActiveAt=this.now();old.revision=++this.sequence;}}
-  const same=p?.role===role;p={...p,id,name:String(event.name||p?.name||id).slice(0,32),avatar:event.avatar||p?.avatar||'',gender,variant:p?.variant??event.variant??this.variant++,idleProtected:Boolean(p?.idleProtected||event.idleProtected),role,roleSince:same?p.roleSince:this.now(),roleOrder:same?p.roleOrder:++this.roleSequence,slot:same?p.slot:slot,revision:same?p.revision:++this.sequence,lastActiveAt:this.now()};this.waitlist.delete(id);this.players.set(id,p);this.emit('role',{id,role,same,paid,...(event.automatic?{automatic:true}:{}),player:presentationPlayer(p)});this.note(p.name+' · '+ROLE_LABELS[role]);if(event.soloRequested)this.emit('effect',{id,name:p.name,role:'solo',paid,player:presentationPlayer(p)});
+  const same=p?.role===role;p={...p,id,name:String(event.name||p?.name||id).slice(0,32),avatar:event.avatar||p?.avatar||'',gender,variant:p?.variant??event.variant??this.variant++,idleProtected:Boolean(p?.idleProtected||event.idleProtected),role,roleSince:same?p.roleSince:this.now(),roleOrder:same?p.roleOrder:++this.roleSequence,slot:same?p.slot:slot,revision:same?p.revision:++this.sequence,lastActiveAt:this.now()};this.waitlist.delete(id);this.likeProgress.delete(id);this.players.set(id,p);this.emit('role',{id,role,same,paid,...(event.automatic?{automatic:true}:{}),player:presentationPlayer(p)});this.note(p.name+' · '+ROLE_LABELS[role]);if(event.soloRequested)this.emit('effect',{id,name:p.name,role:'solo',paid,player:presentationPlayer(p)});
  }
  accept(e){
   if(['chat','like','gift','giftCue'].includes(e.type)){this.touch(e.id);this.sweepInactive();}
   // TikTok can omit the portrait on a gift while including it on a comment.
-  if(e.id&&['chat','gift','giftCue'].includes(e.type)){
+  if(e.id&&['chat','like','gift','giftCue'].includes(e.type)){
    const id=String(e.id),old=this.profiles.get(id)||{},profile={name:String(e.name||old.name||id).slice(0,32),avatar:e.avatar||old.avatar||''};
    this.profiles.delete(id);this.profiles.set(id,profile);if(this.profiles.size>1000)this.profiles.delete(this.profiles.keys().next().value);
-   for(const records of [this.players,this.pending]){const p=records.get(id);if(p){p.name=profile.name;if(profile.avatar)p.avatar=profile.avatar;}}
+   for(const records of [this.players,this.pending,this.likeProgress]){const p=records.get(id);if(p){p.name=profile.name;if(profile.avatar)p.avatar=profile.avatar;}}
   }
+  if(e.type==='like'){this.countLikes(e);return;}
   if(e.type==='chat'){
    const gender=characterCommand(e.text);if(gender){this.select(e.id,gender);this.note(e.name+' karakterini seçti: '+(gender==='female'?'kadın':'erkek'));if(this.settings.chatJoin&&!this.players.has(e.id))this.assign(e,'dance');}
    const join=String(e.text).trim().toLocaleLowerCase('tr-TR');if(this.settings.chatJoin&&['katıl','katil'].includes(join))this.assign(e,'dance');
@@ -74,5 +89,5 @@ export class ClubSession{
    const role=giftRole(this.settings,e);if(!role)return;if(e.type==='gift'&&e.cued)return;this.assign(e,role);
   }
  }
- snapshot(){return {epoch:this.epoch,mode:this.mode,seq:this.sequence,players:[...this.players.values()],events:this.events,pending:[...this.pending.values()].map(({id,name})=>({id,name})),waiting:[...this.waitlist.values()].map(({id,name},index)=>({id,name,position:index+1})),capacity:{floor:MAX_DANCERS,vip:MAX_VIP,stageDancers:MAX_STAGE_DANCERS,total:MAX_GUESTS,idleSeconds:DANCE_IDLE_MS/1000},notices:this.notices};}
+ snapshot(){return {epoch:this.epoch,mode:this.mode,seq:this.sequence,likeProgress:[...this.likeProgress.values()].sort((a,b)=>b.count-a.count).slice(0,20),players:[...this.players.values()],events:this.events,pending:[...this.pending.values()].map(({id,name})=>({id,name})),waiting:[...this.waitlist.values()].map(({id,name},index)=>({id,name,position:index+1})),capacity:{floor:MAX_DANCERS,vip:MAX_VIP,stageDancers:MAX_STAGE_DANCERS,total:MAX_GUESTS,idleSeconds:DANCE_IDLE_MS/1000},notices:this.notices};}
 }
