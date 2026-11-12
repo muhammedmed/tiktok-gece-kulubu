@@ -126,7 +126,7 @@ Eşleşme **hediye kimliğiyle (ID)** yapılır; aynı jeton değerindeki başka
 
 TikTok/LIVE Studio hesabınızda **İzleyici Dilekleri** paneli varsa orada gösterdiğiniz hediye ve açıklamayı ÂLÂ'daki eşleşmeyle aynı yapın. Örneğin TikTok'ta Gül için “Para saç” yazıyorsa burada da Gül → Para saç olmalıdır. TikTok panelini kendi arayüzünde etkinleştirin.
 
-Bu iki panel otomatik olarak birbirine ayar aktarmaz. TikTok paneli izleyiciye hediyeyi gösterir; ÂLÂ ise gelen hediye ID'sine göre oyunu çalıştırır. Oyun görüntüsüne çizilen rehber videonun parçasıdır; üzerine dokunmak TikTok hediye seçicisini açmaz. **Kamera altında hediye yönlendirmesini göster** seçeneği yalnızca oyunun kendi rehberini açar/kapatır.
+Bu iki panel otomatik olarak birbirine ayar aktarmaz. TikTok paneli izleyiciye hediyeyi gösterir; ÂLÂ ise gelen hediye ID'sine göre oyunu çalıştırır. Yayın görüntüsünde kamera ve sohbete katılım bilgisi gösterilir; hediye açıklamalarını TikTok’un İzleyici Dilekleri panelinden sunabilirsiniz.
 
 ## 6. Webcam veya döngü video
 
