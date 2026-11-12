@@ -1,0 +1,33 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,readFile,rm,stat} from 'node:fs/promises';import os from 'node:os';import path from 'node:path';
+import {createClubServer} from '../server.js';import {eventDecoder} from '../src/live.js';
+test('connected server sweeps inactive dancers automatically and suspends expiry across reconnects',async t=>{
+ const dataDir=await mkdtemp(path.join(os.tmpdir(),'ala-activity-'));let transport,now=1000000;
+ t.mock.timers.enable({apis:['setInterval']});
+ const app=await createClubServer({dataDir,connectLive:options=>{transport=options;options.onStatus('live','test');return()=>{};}});
+ await new Promise(resolve=>app.server.listen(0,'127.0.0.1',resolve));
+ t.after(async()=>{await app.close();await rm(dataDir,{recursive:true,force:true});});
+ app.session.now=()=>now;
+ await app.control({action:'settings',settings:{handle:'test',chatJoin:true},key:'local-test-key'});await app.control({action:'connect'});
+ transport.onEvent({type:'chat',id:'a',name:'Ada',text:'kadın'});now+=120000;
+ transport.onStatus('retry','test pause');now+=600000;t.mock.timers.tick(5000);assert.equal(app.snapshot().players.length,1);
+ transport.onStatus('live','test resumed');now+=29999;t.mock.timers.tick(5000);assert.equal(app.snapshot().players.length,1);
+ now+=1;t.mock.timers.tick(5000);assert.equal(app.snapshot().players.length,0);assert.equal(app.snapshot().events.at(-1).reason,'inactive');
+});
+test('studio persists credentials privately, broadcasts real decoded events and serves range media without exposing secrets',async t=>{
+ const dataDir=await mkdtemp(path.join(os.tmpdir(),'ala-server-'));let feed,stopped=false;
+ const app=await createClubServer({dataDir,connectLive:opts=>{const decode=eventDecoder(opts.canCue);feed=packet=>{const e=decode(packet);if(e)opts.onEvent(e);};opts.onStatus('live','Mock transport');return()=>{stopped=true;};},catalogLoader:async()=>new Map([['5655',{name:'Rose',coins:1}]])});
+ await new Promise(resolve=>app.server.listen(0,'127.0.0.1',resolve));const base='http://127.0.0.1:'+app.server.address().port;
+ t.after(async()=>{await app.close();await rm(dataDir,{recursive:true,force:true});});
+ const request=async body=>{const r=await fetch(base+'/api/control',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});return {status:r.status,data:await r.json()};};
+ const saved=await request({action:'settings',settings:{handle:'testhost',chatJoin:false,assignments:{dance:{id:'5655',name:'Rose'}}},key:'test-secret-only'});assert.equal(saved.status,200);assert.equal(saved.data.configured,true);assert.ok(!JSON.stringify(saved.data).includes('test-secret-only'));
+ assert.equal((await stat(path.join(dataDir,'settings.json'))).mode&0o777,0o600);
+ assert.equal((await fetch(base+'/private/settings.json')).status,404);assert.equal((await fetch(base+'/api/state',{headers:{Origin:'https://other.example'}})).status,403);
+ const controller=new AbortController(),r=await fetch(base+'/api/events',{signal:controller.signal}),reader=r.body.getReader();assert.match(new TextDecoder().decode((await reader.read()).value),/data:/);
+ await request({action:'test',name:'Only demo',gender:'female',role:'dance'});assert.equal(app.snapshot().players.length,1);await request({action:'connect'});assert.equal(app.snapshot().players.length,0);feed({type:'WebcastGiftMessage',data:{user:{id:'7',nickname:'Ada'},giftId:'5655',gift:{type:0},common:{msgId:'1'}}});
+ assert.equal(app.snapshot().pending.length,1);feed({type:'WebcastChatMessage',data:{user:{id:'7',nickname:'Ada'},content:'kadın',common:{msgId:'2'}}});assert.equal(app.snapshot().players[0].gender,'female');
+ let message='';for(let i=0;i<3&&!message.includes('Ada');i++)message+=new TextDecoder().decode((await reader.read()).value);assert.match(message,/Ada/);assert.ok(!message.includes('test-secret-only'));controller.abort();await reader.cancel().catch(()=>{});
+ assert.equal((await request({action:'test',name:'fake',role:'dance',gender:'male'})).status,400);
+ const uploaded=await fetch(base+'/api/upload/video',{method:'POST',headers:{'Content-Type':'video/mp4'},body:Buffer.from('test-video-content')});assert.equal(uploaded.status,200);
+ const partial=await fetch(base+'/media/video',{headers:{Range:'bytes=0-3'}});assert.equal(partial.status,206);assert.equal(await partial.text(),'test');assert.equal(app.snapshot().settings.cameraMode,'video');
+ await request({action:'disconnect'});assert.equal(stopped,true);assert.equal((await readFile(path.join(dataDir,'settings.json'),'utf8')).includes('test-secret-only'),true);
+});

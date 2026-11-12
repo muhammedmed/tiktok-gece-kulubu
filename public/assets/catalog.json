@@ -1,0 +1,487 @@
+{
+  "models": [
+    {
+      "slug": "female-party-02",
+      "title": "Female Party 02",
+      "category": "Characters",
+      "collection": "rigged-adults",
+      "license": "mit",
+      "glb": "/models/female-party-02.glb",
+      "bytes": 1233576,
+      "thumb": "/thumbs/female-party-02.webp",
+      "triangles": 9874,
+      "size": [
+        1.217,
+        1.79,
+        0.353
+      ],
+      "rigged": true,
+      "gender": "female",
+      "animationSet": "f"
+    },
+    {
+      "slug": "female-adult-11",
+      "title": "Female Adult 11",
+      "category": "Characters",
+      "collection": "rigged-adults",
+      "license": "mit",
+      "glb": "/models/female-adult-11.glb",
+      "bytes": 991720,
+      "thumb": "/thumbs/female-adult-11.webp",
+      "triangles": 8896,
+      "size": [
+        1.217,
+        1.736,
+        0.374
+      ],
+      "rigged": true,
+      "gender": "female",
+      "animationSet": "f"
+    },
+    {
+      "slug": "business-female-03",
+      "title": "Businesswoman 03",
+      "category": "Characters",
+      "collection": "rigged-professions",
+      "license": "mit",
+      "glb": "/models/business-female-03.glb",
+      "bytes": 845076,
+      "thumb": "/thumbs/business-female-03.webp",
+      "triangles": 8438,
+      "size": [
+        1.217,
+        1.743,
+        0.315
+      ],
+      "rigged": true,
+      "gender": "female",
+      "role": "Business",
+      "animationSet": "f"
+    },
+    {
+      "slug": "female-adult-02",
+      "title": "Female Adult 02",
+      "category": "Characters",
+      "collection": "rigged-adults",
+      "license": "mit",
+      "glb": "/models/female-adult-02.glb",
+      "bytes": 1034908,
+      "thumb": "/thumbs/female-adult-02.webp",
+      "triangles": 8940,
+      "size": [
+        1.217,
+        1.735,
+        0.351
+      ],
+      "rigged": true,
+      "gender": "female",
+      "animationSet": "f"
+    },
+    {
+      "slug": "female-adult-15",
+      "title": "Female Adult 15",
+      "category": "Characters",
+      "collection": "rigged-adults",
+      "license": "mit",
+      "glb": "/models/female-adult-15.glb",
+      "bytes": 988596,
+      "thumb": "/thumbs/female-adult-15.webp",
+      "triangles": 9832,
+      "size": [
+        1.217,
+        1.739,
+        0.37
+      ],
+      "rigged": true,
+      "gender": "female",
+      "animationSet": "f"
+    },
+    {
+      "slug": "female-adult-03",
+      "title": "Female Adult 03",
+      "category": "Characters",
+      "collection": "rigged-adults",
+      "license": "mit",
+      "glb": "/models/female-adult-03.glb",
+      "bytes": 1094840,
+      "thumb": "/thumbs/female-adult-03.webp",
+      "triangles": 9208,
+      "size": [
+        1.217,
+        1.739,
+        0.326
+      ],
+      "rigged": true,
+      "gender": "female",
+      "animationSet": "f"
+    },
+    {
+      "slug": "female-adult-13",
+      "title": "Female Adult 13",
+      "category": "Characters",
+      "collection": "rigged-adults",
+      "license": "mit",
+      "glb": "/models/female-adult-13.glb",
+      "bytes": 1052744,
+      "thumb": "/thumbs/female-adult-13.webp",
+      "triangles": 8708,
+      "size": [
+        1.217,
+        1.752,
+        0.292
+      ],
+      "rigged": true,
+      "gender": "female",
+      "animationSet": "f"
+    },
+    {
+      "slug": "female-adult-17",
+      "title": "Female Adult 17",
+      "category": "Characters",
+      "collection": "rigged-adults",
+      "license": "mit",
+      "glb": "/models/female-adult-17.glb",
+      "bytes": 1020020,
+      "thumb": "/thumbs/female-adult-17.webp",
+      "triangles": 8516,
+      "size": [
+        1.217,
+        1.751,
+        0.321
+      ],
+      "rigged": true,
+      "gender": "female",
+      "animationSet": "f"
+    },
+    {
+      "slug": "female-party-01",
+      "title": "Female Party 01",
+      "category": "Characters",
+      "collection": "rigged-adults",
+      "license": "mit",
+      "glb": "/models/female-party-01.glb",
+      "bytes": 1169128,
+      "thumb": "/thumbs/female-party-01.webp",
+      "triangles": 10254,
+      "size": [
+        1.217,
+        1.753,
+        0.318
+      ],
+      "rigged": true,
+      "gender": "female",
+      "animationSet": "f"
+    },
+    {
+      "slug": "female-adult-08",
+      "title": "Female Adult 08",
+      "category": "Characters",
+      "collection": "rigged-adults",
+      "license": "mit",
+      "glb": "/models/female-adult-08.glb",
+      "bytes": 1035284,
+      "thumb": "/thumbs/female-adult-08.webp",
+      "triangles": 8276,
+      "size": [
+        1.217,
+        1.735,
+        0.362
+      ],
+      "rigged": true,
+      "gender": "female",
+      "animationSet": "f"
+    },
+    {
+      "slug": "male-adult-08",
+      "title": "Male Adult 08",
+      "category": "Characters",
+      "collection": "rigged-adults",
+      "license": "mit",
+      "glb": "/models/male-adult-08.glb",
+      "bytes": 949276,
+      "thumb": "/thumbs/male-adult-08.webp",
+      "triangles": 7364,
+      "size": [
+        1.348,
+        1.826,
+        0.339
+      ],
+      "rigged": true,
+      "gender": "male",
+      "animationSet": "m"
+    },
+    {
+      "slug": "male-adult-11",
+      "title": "Male Adult 11",
+      "category": "Characters",
+      "collection": "rigged-adults",
+      "license": "mit",
+      "glb": "/models/male-adult-11.glb",
+      "bytes": 555968,
+      "thumb": "/thumbs/male-adult-11.webp",
+      "triangles": 6740,
+      "size": [
+        1.348,
+        1.803,
+        0.324
+      ],
+      "rigged": true,
+      "gender": "male",
+      "animationSet": "m"
+    },
+    {
+      "slug": "male-adult-09",
+      "title": "Male Adult 09",
+      "category": "Characters",
+      "collection": "rigged-adults",
+      "license": "mit",
+      "glb": "/models/male-adult-09.glb",
+      "bytes": 800008,
+      "thumb": "/thumbs/male-adult-09.webp",
+      "triangles": 7428,
+      "size": [
+        1.348,
+        1.822,
+        0.362
+      ],
+      "rigged": true,
+      "gender": "male",
+      "animationSet": "m"
+    },
+    {
+      "slug": "male-adult-12",
+      "title": "Male Adult 12",
+      "category": "Characters",
+      "collection": "rigged-adults",
+      "license": "mit",
+      "glb": "/models/male-adult-12.glb",
+      "bytes": 718264,
+      "thumb": "/thumbs/male-adult-12.webp",
+      "triangles": 6722,
+      "size": [
+        1.348,
+        1.807,
+        0.361
+      ],
+      "rigged": true,
+      "gender": "male",
+      "animationSet": "m"
+    },
+    {
+      "slug": "male-adult-04",
+      "title": "Male Adult 04",
+      "category": "Characters",
+      "collection": "rigged-adults",
+      "license": "mit",
+      "glb": "/models/male-adult-04.glb",
+      "bytes": 1071828,
+      "thumb": "/thumbs/male-adult-04.webp",
+      "triangles": 8684,
+      "size": [
+        1.348,
+        1.869,
+        0.344
+      ],
+      "rigged": true,
+      "gender": "male",
+      "animationSet": "m"
+    },
+    {
+      "slug": "male-adult-02",
+      "title": "Male Adult 02",
+      "category": "Characters",
+      "collection": "rigged-adults",
+      "license": "mit",
+      "glb": "/models/male-adult-02.glb",
+      "bytes": 866176,
+      "thumb": "/thumbs/male-adult-02.webp",
+      "triangles": 7312,
+      "size": [
+        1.348,
+        1.823,
+        0.34
+      ],
+      "rigged": true,
+      "gender": "male",
+      "animationSet": "m"
+    },
+    {
+      "slug": "male-adult-07",
+      "title": "Male Adult 07",
+      "category": "Characters",
+      "collection": "rigged-adults",
+      "license": "mit",
+      "glb": "/models/male-adult-07.glb",
+      "bytes": 883880,
+      "thumb": "/thumbs/male-adult-07.webp",
+      "triangles": 7588,
+      "size": [
+        1.348,
+        1.821,
+        0.345
+      ],
+      "rigged": true,
+      "gender": "male",
+      "animationSet": "m"
+    },
+    {
+      "slug": "male-adult-10",
+      "title": "Male Adult 10",
+      "category": "Characters",
+      "collection": "rigged-adults",
+      "license": "mit",
+      "glb": "/models/male-adult-10.glb",
+      "bytes": 920432,
+      "thumb": "/thumbs/male-adult-10.webp",
+      "triangles": 6732,
+      "size": [
+        1.348,
+        1.831,
+        0.342
+      ],
+      "rigged": true,
+      "gender": "male",
+      "animationSet": "m"
+    },
+    {
+      "slug": "male-adult-16",
+      "title": "Male Adult 16",
+      "category": "Characters",
+      "collection": "rigged-adults",
+      "license": "mit",
+      "glb": "/models/male-adult-16.glb",
+      "bytes": 565792,
+      "thumb": "/thumbs/male-adult-16.webp",
+      "triangles": 7064,
+      "size": [
+        1.348,
+        1.809,
+        0.334
+      ],
+      "rigged": true,
+      "gender": "male",
+      "animationSet": "m"
+    },
+    {
+      "slug": "male-adult-20",
+      "title": "Male Adult 20",
+      "category": "Characters",
+      "collection": "rigged-adults",
+      "license": "mit",
+      "glb": "/models/male-adult-20.glb",
+      "bytes": 624000,
+      "thumb": "/thumbs/male-adult-20.webp",
+      "triangles": 7120,
+      "size": [
+        1.348,
+        1.805,
+        0.349
+      ],
+      "rigged": true,
+      "gender": "male",
+      "animationSet": "m"
+    },
+    {
+      "slug": "business-male-06",
+      "title": "Businessman 06",
+      "category": "Characters",
+      "collection": "rigged-professions",
+      "license": "mit",
+      "glb": "/models/business-male-06.glb",
+      "bytes": 502912,
+      "thumb": "/thumbs/business-male-06.webp",
+      "triangles": 6950,
+      "size": [
+        1.348,
+        1.81,
+        0.337
+      ],
+      "rigged": true,
+      "gender": "male",
+      "role": "Business",
+      "animationSet": "m"
+    }
+  ],
+  "animations": [
+    {
+      "id": "f_idle_neutral_01",
+      "name": "Idle",
+      "set": "f",
+      "glb": "/animations/f_idle_neutral_01.glb",
+      "seconds": 15.533,
+      "bytes": 110432
+    },
+    {
+      "id": "m_idle_neutral_01",
+      "name": "Idle",
+      "set": "m",
+      "glb": "/animations/m_idle_neutral_01.glb",
+      "seconds": 11.667,
+      "bytes": 113152
+    },
+    {
+      "id": "f_cheer_01",
+      "name": "Cheer",
+      "set": "f",
+      "glb": "/animations/f_cheer_01.glb",
+      "seconds": 15.3,
+      "bytes": 346924
+    },
+    {
+      "id": "m_cheer_01",
+      "name": "Cheer",
+      "set": "m",
+      "glb": "/animations/m_cheer_01.glb",
+      "seconds": 24.633,
+      "bytes": 496912
+    },
+    {
+      "id": "f_claphands_01",
+      "name": "Clap",
+      "set": "f",
+      "glb": "/animations/f_claphands_01.glb",
+      "seconds": 15.933,
+      "bytes": 298420
+    },
+    {
+      "id": "m_claphands_01",
+      "name": "Clap",
+      "set": "m",
+      "glb": "/animations/m_claphands_01.glb",
+      "seconds": 7,
+      "bytes": 187924
+    },
+    {
+      "id": "f_dancing_neutral",
+      "name": "Dance",
+      "set": "f",
+      "glb": "/animations/f_dancing_neutral.glb",
+      "seconds": 24.967,
+      "bytes": 401732
+    },
+    {
+      "id": "m_dancing_neutral",
+      "name": "Dance",
+      "set": "m",
+      "glb": "/animations/m_dancing_neutral.glb",
+      "seconds": 21.5,
+      "bytes": 384456
+    },
+    {
+      "id": "f_walk_neutral_01",
+      "name": "Walk",
+      "set": "f",
+      "glb": "/animations/f_walk_neutral_01.glb",
+      "seconds": 1.2,
+      "bytes": 46748
+    },
+    {
+      "id": "m_walk_neutral_01",
+      "name": "Walk",
+      "set": "m",
+      "glb": "/animations/m_walk_neutral_01.glb",
+      "seconds": 1.2,
+      "bytes": 44344
+    }
+  ]
+}
