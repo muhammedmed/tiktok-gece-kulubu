@@ -1,6 +1,7 @@
 import * as T from 'three';
 import {MONEY_SECONDS,MONEY_ENTRY,moneyGesture,moneyEnvelope} from './money-motion.js';
 import {floorHeight} from './spatial.js';
+import {updatePortrait} from './portrait.js';
 function hideForShow(show,person){
  if(person.moneyHidden)return;
  show.hidden.add(person);person.moneyHidden=true;person.root.visible=false;person.tag.hidden=true;
@@ -13,7 +14,7 @@ export class MoneyShow{
   const end=receiver.root.position.clone().add(new T.Vector3(1.05,0,.65)),start=end.clone().add(new T.Vector3(.3,0,1.5));end.y=floorHeight(end.x,end.z);start.y=floorHeight(start.x,start.z);
   const yaw=Math.atan2(receiver.root.position.x-end.x,receiver.root.position.z-end.z);
   const proxy=this.spawn({name:event.name,gender:source?.gender||event.gender||'male',variant:source?.variant??0,modelName:source?.modelName,role:'dance',x:start.x,y:start.y,z:start.z,yaw});proxy.moneyGuest=true;
-  const avatar=source?.avatar||event.avatar;if(avatar){const img=document.createElement('img');img.src=avatar;img.alt='';img.referrerPolicy='no-referrer';img.onerror=()=>img.remove();proxy.tag.querySelector('em').replaceChildren(img);}
+  const avatar=source?.avatar||event.avatar;if(avatar)updatePortrait(proxy,{name:event.name,avatar});
   proxy.walkTo([end.toArray()],'dance',yaw,MONEY_ENTRY);
   this.active={source,proxy,receiver,hidden:new Set(),startedAt:time,lastEmission:-1,yaw,receiverYaw:receiver.root.rotation.y,receiverFacing:receiver.danceFacing,end:end.clone(),exiting:false};if(source)hideForShow(this.active,source);this.update(time);return true;
  }

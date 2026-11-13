@@ -24,10 +24,10 @@ test('kapalı yayını sessizce bekler, açıldığında ilk yorumu işler ve so
     sockets[i].message('room.status', {state:'connecting'});
     sockets[i].message('room.status', {state:'offline', terminal:true});
   }
-  tick(89000);
+  tick(14999);
   assert.equal(sockets.length, 4);
   assert.deepEqual(statuses, ['connecting','waiting']);
-  tick(1000);
+  tick(1);
   const live = sockets[4];
   live.message('WebcastChatMessage', {user:{id:'4',nickname:'Ada'},content:'katıl'});
   assert.equal(statuses.at(-1), 'live');
@@ -37,6 +37,18 @@ test('kapalı yayını sessizce bekler, açıldığında ilk yorumu işler ve so
   assert.equal(statuses.at(-1), 'waiting');
   tick(15000);
   assert.equal(sockets.length, 6);
+});
+
+test('uzun yayın hazırlığında da 15 saniyede dener ve ilk gülü işler', t => {
+  const {sockets, events, statuses, tick} = watch(t);
+  for(let i=0;i<20;i++) {
+    sockets[i].onclose({code:4404});
+    tick(14999);assert.equal(sockets.length,i+1);
+    tick(1);assert.equal(sockets.length,i+2);
+  }
+  sockets.at(-1).message('WebcastGiftMessage',{user:{id:'rose',nickname:'Gül gönderen'},giftId:5655,gift:{type:0},common:{msgId:'first-rose'}});
+  assert.equal(statuses.at(-1),'live');
+  assert.equal(events.length,1);assert.equal(events[0].giftId,'5655');
 });
 
 test('kota dolunca bekler, kimlik hatasında durur, iptal edilen denemeyi canlandırmaz', t => {

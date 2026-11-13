@@ -57,12 +57,15 @@ export class ShotQueue {
  clear(){const previous=this.current,waiting=this.items;this.items=[];this.current=null;this.returnUntil=0;this.completedGiftKeys.clear();this.release(previous);waiting.forEach(e=>this.release(e));}
 }
 export const DANCE_SHOT_SECONDS=5;
-export const TOUR_STOPS=[['wide',4],['dance',15],['saz',8],['dance',15],['stageDancers',9],['dance',15],['vipLeft',9],['dance',15],['drum',8],['dance',15],['waiter',7],['dance',15],['vipRight',9],['dance',15],['dj',7],['dance',15],['vipOuterLeft',9],['dance',15],['vipOuterRight',9]];
+// Most automatic airtime belongs to floor viewers. Other destinations are
+// short interludes and are skipped immediately when nobody occupies them.
+export const TOUR_STOPS=[['wide',3],['dance',24],['waiter',5],['dance',24],['stageDancers',7],['dance',24],['saz',6],['dance',24],['vipLeft',6],['dance',24],['drum',6],['dance',24],['vipRight',6],['dance',24],['stageDancers',6],['dance',24],['vipOuterLeft',6],['dance',24],['dj',5],['dance',24],['vipOuterRight',6]];
 export class AutoTour {
  constructor(){this.index=0;this.elapsed=0;this.lastTime=null;this.cycle=0;this.danceIndex=0;}
- resumeDance(){this.index=(this.index+1)%TOUR_STOPS.length;while(TOUR_STOPS[this.index][0]!=='dance')this.index=(this.index+1)%TOUR_STOPS.length;this.elapsed=0;this.cycle++;}
- tick(now,paused=false){const dt=this.lastTime===null?0:Math.max(0,now-this.lastTime);this.lastTime=now;
+ resumeDance(){if(TOUR_STOPS[this.index][0]==='dance')this.danceIndex+=Math.floor(this.elapsed/DANCE_SHOT_SECONDS)+1;this.index=(this.index+1)%TOUR_STOPS.length;while(TOUR_STOPS[this.index][0]!=='dance')this.index=(this.index+1)%TOUR_STOPS.length;this.elapsed=0;this.cycle++;}
+ tick(now,paused=false,available=()=>true){const dt=this.lastTime===null?0:Math.max(0,now-this.lastTime);this.lastTime=now;
   if(!paused){this.elapsed+=dt;while(this.elapsed>=TOUR_STOPS[this.index][1]){if(TOUR_STOPS[this.index][0]==='dance')this.danceIndex+=Math.ceil(TOUR_STOPS[this.index][1]/DANCE_SHOT_SECONDS);this.elapsed-=TOUR_STOPS[this.index][1];this.index=(this.index+1)%TOUR_STOPS.length;this.cycle++;}}
+  if(!paused)for(let n=0;n<TOUR_STOPS.length&&!available(TOUR_STOPS[this.index][0]);n++){this.index=(this.index+1)%TOUR_STOPS.length;this.elapsed=0;this.cycle++;}
   return{view:TOUR_STOPS[this.index][0],elapsed:this.elapsed,id:this.cycle,danceIndex:this.danceIndex+(TOUR_STOPS[this.index][0]==='dance'?Math.floor(this.elapsed/DANCE_SHOT_SECONDS):0),danceElapsed:this.elapsed%DANCE_SHOT_SECONDS};
  }
 }

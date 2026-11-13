@@ -43,7 +43,7 @@ test('finished songs advance exactly once across multiple playback windows, wrap
 });
 
 test('reordering keeps current audio, removals choose its successor, and an empty list can be reused',async t=>{
- const f=await fixture(t);await f.upload('A');await f.upload('B');await f.upload('C');
+ const f=await fixture(t);for(const name of ['A','B','C'])assert.equal((await f.upload(name)).status,200);
  const [a,b,c]=f.state().playlist.tracks,version=f.state().settings.musicVersion;
  await f.request({action:'musicMove',id:c.id,direction:-1});assert.deepEqual(f.state().playlist.tracks.map(t=>t.id),[a.id,c.id,b.id]);assert.equal(f.state().settings.musicVersion,version);
  assert.equal((await f.request({action:'musicMove',id:c.id,direction:2})).status,400);
@@ -54,6 +54,22 @@ test('reordering keeps current audio, removals choose its successor, and an empt
  await f.request({action:'musicRemove',id:c.id});assert.equal(f.state().playlist.currentId,null);assert.equal(f.state().settings.musicPlaying,false);
  await f.upload('D');assert.equal(f.state().playlist.tracks.length,1);assert.equal(f.state().settings.musicPlaying,true);
  const stable=f.state().playlist;assert.equal((await f.upload('bad','abc','text/html')).status,400);assert.equal((await f.upload('empty','')).status,400);assert.deepEqual(f.state().playlist,stable);
+});
+
+test('rapid sequential uploads release their slot before reporting success',async t=>{
+ const f=await fixture(t),names=Array.from({length:30},(_,i)=>'Batch '+i+'.mp3');
+ for(const name of names){const result=await f.upload(name);assert.equal(result.status,200,JSON.stringify(result.body));}
+ assert.deepEqual(f.state().playlist.tracks.map(t=>t.title),names);
+});
+
+test('partial settings updates preserve playback and have an ordered state revision',async t=>{
+ const f=await fixture(t);await f.upload('A');await f.upload('B');
+ const b=f.state().playlist.tracks[1];await f.request({action:'musicPlay',id:b.id});
+ const playing=f.state();await f.request({action:'settings',settings:{musicPlaying:false}});
+ const paused=f.state();assert.ok(paused.seq>playing.seq);
+ await f.request({action:'settings',settings:{cameraSize:30}});
+ assert.ok(f.state().seq>paused.seq);assert.equal(f.state().settings.musicPlaying,false);
+ assert.equal(f.state().playlist.currentId,b.id);assert.equal(f.state().settings.musicVersion,paused.settings.musicVersion);
 });
 
 test('legacy music migrates once without deleting the original or changing unrelated settings',async t=>{

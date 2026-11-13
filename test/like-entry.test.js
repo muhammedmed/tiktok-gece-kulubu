@@ -6,7 +6,20 @@ import {DEFAULT_SETTINGS,validateSettings} from '../public/club-contract.js';
 import {MAX_DANCERS,DANCE_IDLE_MS} from '../public/club-layout.js';
 const chat=(s,id,text)=>s.accept({type:'chat',id,name:'Same name',text});
 const likes=(s,id,amount)=>s.accept({type:'like',id,name:'Same name',amount});
-const fresh=extra=>new ClubSession({...DEFAULT_SETTINGS,handle:'host',...extra});
+const fresh=extra=>new ClubSession({...DEFAULT_SETTINGS,handle:'host',likeJoinCount:200,...extra});
+
+test('default entry requires Rose; character chat and any number of likes cannot enter',()=>{
+ assert.equal(DEFAULT_SETTINGS.likeJoinCount,0);assert.equal(DEFAULT_SETTINGS.chatJoin,false);
+ assert.equal(validateSettings({}).likeJoinCount,0);
+ for(const text of ['kadın','erkek']){
+  const s=new ClubSession({...DEFAULT_SETTINGS,handle:'host'});
+  chat(s,'a',text);likes(s,'a',200);likes(s,'a',10000);
+  assert.equal(s.players.size,0);assert.equal(s.pending.size,0);assert.equal(s.waitlist.size,0);assert.equal(s.likeProgress.size,0);
+  s.accept({type:'gift',id:'a',name:'Ada',giftId:'999999'});assert.equal(s.players.size,0);
+  s.accept({type:'gift',id:'a',name:'Ada',giftId:'5655'});
+  assert.equal(s.players.get('a').role,'dance');assert.equal(s.players.get('a').gender,text==='kadın'?'female':'male');
+ }
+});
 
 test('200 received likes are counted per ID, even for identical names, and trigger only once',()=>{
  const s=fresh();chat(s,'a','kadın');chat(s,'b','erkek');
@@ -43,7 +56,7 @@ test('Rose still enters immediately and likes do not replace VIP or pending paid
 });
 
 test('a like entry waits for a free floor slot, stays unique and follows ordinary idle expiry',()=>{
- let now=1000000;const s=new ClubSession({...DEFAULT_SETTINGS,defaultGender:'female'}, {},()=>now);s.mode='live';
+ let now=1000000;const s=new ClubSession({...DEFAULT_SETTINGS,defaultGender:'female',likeJoinCount:200}, {},()=>now);s.mode='live';
  for(let i=0;i<MAX_DANCERS;i++)s.assign({id:String(i),name:String(i),type:'gift'},'dance');
  likes(s,'late',200);likes(s,'late',200);assert.equal(s.waitlist.size,1);assert.equal(s.players.size,MAX_DANCERS);
  s.players.delete('0');s.sweepInactive();assert.equal(s.players.get('late').role,'dance');assert.equal(s.players.get('late').idleProtected,false);

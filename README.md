@@ -1,6 +1,6 @@
 # ÂLÂ — TikTok Gece Kulübü
 
-TikTok LIVE sohbet ve hediyeleriyle çalışan, bilgisayarda yerel olarak açılan 3D gece kulübü. İzleyiciler `kadın` / `erkek` yazarak karakterini seçer, Gül göndererek veya 200 beğeniye ulaşarak piste katılır; hediyelerle VIP, müzisyen, DJ, garson ve dansöz rollerine geçer veya sahne efektleri başlatır. Kamera girişleri, rolleri ve gösterileri otomatik takip eder.
+TikTok LIVE sohbet ve hediyeleriyle çalışan, bilgisayarda yerel olarak açılan 3D gece kulübü. İzleyiciler `kadın` / `erkek` yazarak karakterini seçer, Gül göndererek piste katılır; hediyelerle VIP, müzisyen, DJ, garson ve dansöz rollerine geçer veya sahne efektleri başlatır. Kamera girişleri, rolleri ve gösterileri otomatik takip eder.
 
 **Pist kapasitesi 84 kişi.** VIP locaları, sahne rolleri ve dekor karakterleri bu pist sınırından ayrıdır. Her yayıncı kendi TikTok hesabını, Euler API anahtarını, müziğini ve kamera videosunu kullanır.
 
@@ -35,9 +35,9 @@ Sunucu terminalini yayın boyunca açık tutun. `index.html` dosyasını çift t
 ## İlk açılışta hangi ayarlar var?
 
 - TikTok kullanıcı adı ve Euler anahtarı **boştur**; yayıncının kendisi girer.
-- `kadın` / `kadin` veya `erkek` karakteri seçer; Gül veya kişiye ait 200 beğeni piste çıkarır. Büyük/küçük harf fark etmez. Önce Gül gönderen kişinin seçimi beklenir; yeniden hediye gerekmez.
+- `kadın` / `kadin` veya `erkek` karakteri seçer; Gül piste çıkarır. Büyük/küçük harf fark etmez. Önce Gül gönderen kişinin seçimi beklenir; yeniden hediye gerekmez.
 - **Gül / Rose (#5655) → Piste çık** eşleştirmesi hazırdır.
-- Beğeni hedefi **200**; panelde değiştirilebilir veya **0** ile kapatılabilir. Yalnızca bağlantıya ulaşan kullanıcı beğenileri sayılır; TikTok bazı güncellemeleri iletmeyebilir.
+- Beğeniyle ve yalnızca sohbet mesajıyla giriş varsayılan olarak **kapalıdır**. İsterseniz panelden kişi başına beğeni hedefi belirleyin (örneğin 250); yalnızca Gül ile giriş için 0 olarak bırakın.
 - Diğer hediyeler seçilene kadar kapalıdır; **Hediye → eylem** bölümünden belirlenir.
 - Webcam/video ve müzik hazır gelmez; kendi dosyalarınızı veya kameranızı eklersiniz.
 - Müzik paneline birden fazla MP3 ekleyebilirsiniz. Liste kaydedilir, sırayla çalar ve sonunda başa döner; yeni yüklemeler çalan parçayı kesmez.
@@ -47,7 +47,7 @@ Sunucu terminalini yayın boyunca açık tutun. `index.html` dosyasını çift t
 
 | Özellik | Davranış |
 | --- | --- |
-| Piste giriş | Sohbette `kadın` / `erkek` ile karakter seçimi, ardından Gül veya kişi başına 200 beğeni; dolu pistte bekleme sırası |
+| Piste giriş | Sohbette `kadın` / `erkek` ile karakter seçimi, ardından Gül; dolu pistte bekleme sırası |
 | Yalnızca sohbetle giriş | İstenirse panelden açılır; varsayılan olarak kapalıdır. Beğeniyle giriş ayrı çalışır. |
 | Aktiflik | 150 saniye sohbet/beğeni/hediye etkileşimi olmayan ücretsiz pist katılımcısı çıkarılır |
 | Korunan roller | VIP, müzisyenler ve ücretli rol alanlar otomatik çıkarılmaz; yayıncı panelden kaldırabilir |
@@ -59,6 +59,8 @@ Sunucu terminalini yayın boyunca açık tutun. `index.html` dosyasını çift t
 | Coştur | 18 saniye farklı figürler, uygun çiftlerde eş değişimi ve hareketli kamera |
 | Para saç | 6 saniye, gönderen karakter dansöze gider ve banknot saçar |
 | Sohbet | Karakterin yanında kısa süreli mesaj balonu; gelirse TikTok profil fotoğrafı |
+| Gecenin Yıldızı | Türkiye takvim gününde gelen hediyelerin toplam jetonuna göre liderin adı ve profil fotoğrafı |
+| Pist sayacı | Yalnızca pistteki izleyici karakterleri; camın yanında, dikey yayın kenarından içeride |
 
 Başlayan hediye gösterisi bitmeden yeni hediye veya sohbet kamerayı kesmez. Bekleyen gösteriler öncelik ve geliş sırasına göre oynar. Ayrıntılar ve süreler [kullanım rehberinde](docs/KURULUM.md#hediye-gösterileri-ve-roller).
 
@@ -77,5 +79,7 @@ npm test
 ```
 
 Testler sahne/rol kuralları, kapasite, hediye akışı, kamera, karakter hareketleri ve yerel sunucuyu kapsar. Euler bağlantısı testlerde taklit edilir; gerçek yayındaki sohbet ve hediye denemesi ayrıca yapılmalıdır.
+
+13 Kasım 2026 kontrolünde 195 testin 194'ü geçti. Bilinen sorun: `female-party-01` kadın müzisyen modelinin saz/kıyafet kesişme testi başarısız; bu görsel çakışmanın düzeltilmesi gerekiyor.
 
 3D karakterler oyun modelleridir; fotogerçekçi tarama değildir. Danslar 112 BPM ortak saate göre hesaplanır; yüklediğiniz şarkının ritmi otomatik çözümlenmez. [Varlıklar ve üçüncü taraf lisansları](docs/ASSETS.md), [karakter lisansı](docs/CHARACTER-LICENSE.txt).

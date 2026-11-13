@@ -2,12 +2,13 @@ import {ROLE_LABELS} from './club-contract.js';
 import {MAX_DANCERS} from './club-layout.js';
 import {setupMusicPlaylist} from './music-playlist.js';
 import {isOlderState} from './state-order.js';
+import {setupNightScoreboard} from './night-scoreboard.js';
 const $=id=>document.getElementById(id),broadcast=location.pathname==='/overlay';
 export function setupStudio(onState){
  let state,lastSettings='',cameraSignature='',mediaStream,noticeTimer;
- const catalog=new Map(),selections=new Map(),playlist=setupMusicPlaylist({control,save,broadcast});
+ const catalog=new Map(),selections=new Map(),playlist=setupMusicPlaylist({control,save,broadcast}),nightScoreboard=setupNightScoreboard();
  async function control(body){try{const r=await fetch('/api/control',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}),s=await r.json();if(!r.ok)throw Error(s.error);receive(s);return true;}catch(e){$('studioStatus').textContent=e.message;return false;}}
- async function save(part,key){return control({action:'settings',settings:{...state.settings,...part},...(key?{key}:{})});}
+ async function save(part,key){return control({action:'settings',settings:part,...(key?{key}:{})});}
  function fillGifts(){for(const [role,select]of selections){const chosen=select.value||state?.settings.assignments[role]?.id||'',query=$('giftSearch').value.toLocaleLowerCase('tr');select.replaceChildren(new Option('Eşleştirilmedi · kapalı',''));for(const [id,g]of [...catalog].sort((a,b)=>a[1].name.localeCompare(b[1].name,'tr'))){if(query&&!g.name.toLocaleLowerCase('tr').includes(query)&&id!==chosen)continue;select.append(new Option(g.name+' · #'+id+(g.coins?' · '+g.coins+' jeton':''),id));}select.value=chosen;}}
  for(const [role,label]of Object.entries(ROLE_LABELS)){const row=document.createElement('label'),select=document.createElement('select');row.textContent=label;select.ariaLabel=label+' hediyesi';row.append(select);$('giftAssignments').append(row);selections.set(role,select);}
  $('giftSearch').oninput=fillGifts;
@@ -23,22 +24,23 @@ export function setupStudio(onState){
  $('testCharacterChat').onclick=()=>control({action:'testChat',name:$('guestName').value,text:$('characterChat').value});$('resetPreview').onclick=()=>control({action:'preview'});
  $('broadcastUrl').value=location.origin+'/overlay?studio=tiktok';
  $('openBroadcast').onclick=e=>{e.preventDefault();window.open('/overlay?studio=tiktok','ala-broadcast','popup=yes,width=540,height=960');};
- async function applyCamera(settings){const signature=settings.cameraMode+':'+settings.videoVersion;$('broadcastCorner').style.width=settings.cameraSize+'vw';if(signature===cameraSignature)return;cameraSignature=signature;mediaStream?.getTracks().forEach(t=>t.stop());mediaStream=null;const v=$('webcamVideo');v.pause();v.srcObject=null;v.removeAttribute('src');$('webcamBox').hidden=true;
+ async function applyCamera(settings){const signature=settings.cameraMode+':'+settings.videoVersion;$('experience').style.setProperty('--camera-width',settings.cameraSize+'vw');if(signature===cameraSignature)return;cameraSignature=signature;mediaStream?.getTracks().forEach(t=>t.stop());mediaStream=null;const v=$('webcamVideo');v.pause();v.srcObject=null;v.removeAttribute('src');$('webcamBox').hidden=true;
   try{if(settings.cameraMode==='video'&&settings.videoVersion){v.src='/media/video?v='+settings.videoVersion;v.muted=true;v.loop=true;await v.play();$('webcamBox').hidden=false;}else if(settings.cameraMode==='webcam'){mediaStream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:480}},audio:false});if(cameraSignature!==signature){mediaStream.getTracks().forEach(t=>t.stop());return;}v.srcObject=mediaStream;v.muted=true;await v.play();$('webcamBox').hidden=false;}}catch{$('cameraStatus').textContent='Kamera açılamadı. Tarayıcı kamera iznini ve video dosyasını kontrol et.';}
  }
  function receive(s){if(isOlderState(s,state))return;state=s;const st=s.settings;const signature=JSON.stringify(st);if(signature!==lastSettings){lastSettings=signature;for(const g of Object.values(st.assignments))catalog.set(g.id,{...catalog.get(g.id),...g});fillGifts();for(const [role,select]of selections)select.value=st.assignments[role]?.id||'';
-  $('liveHandle').value=st.handle;$('autoConnect').checked=st.autoConnect;$('defaultGender').value=st.defaultGender;$('chatJoin').checked=st.chatJoin;$('likeJoinCount').value=st.likeJoinCount??200;$('cameraMode').value=st.cameraMode;$('cameraSize').value=st.cameraSize;$('volume').value=st.musicVolume;
-  const entry=st.assignments.dance,entryGuide=$('entryGift'),likeTarget=st.likeJoinCount??200;
+  $('liveHandle').value=st.handle;$('autoConnect').checked=st.autoConnect;$('defaultGender').value=st.defaultGender;$('chatJoin').checked=st.chatJoin;$('likeJoinCount').value=st.likeJoinCount??0;$('cameraMode').value=st.cameraMode;$('cameraSize').value=st.cameraSize;$('volume').value=st.musicVolume;
+  const entry=st.assignments.dance,entryGuide=$('entryGift'),likeTarget=st.likeJoinCount??0;
   entryGuide.hidden=st.chatJoin||(!entry&&!likeTarget);
   const ways=[...(entry?[entry.id==='5655'?'🌹 Gül':'🎁 '+entry.name]:[]),...(likeTarget?[likeTarget+' beğeni']:[])];
   entryGuide.textContent='Piste çık · '+ways.join(' veya ');
   $('joinHint').querySelector('strong').textContent=st.chatJoin?'Ücretsiz piste çık':'Karakterini seç';applyCamera(st);
  }
  playlist.receive(s);
+ nightScoreboard(s);
  $('floorStatus').textContent='Pist: '+s.players.filter(p=>p.role==='dance').length+'/'+(s.capacity?.floor||MAX_DANCERS)+' · Sırada: '+(s.waiting?.length||0);
  $('keyStatus').textContent=s.configured?'Anahtar sunucuda kayıtlı; tarayıcıya geri gönderilmez.':'Euler anahtarı henüz kaydedilmedi.';$('liveKey').placeholder=s.configured?'Değiştirmek için yeni anahtar gir':'Anahtarını gir';$('studioStatus').textContent=s.link.detail;$('connectionBadge').textContent=s.link.status==='live'?'TIKTOK BAĞLI':s.mode==='preview'?'ÖNİZLEME':s.mode==='test'?'YEREL TEST':'YAYIN BEKLENİYOR';
  const likeList=$('likeProgressList');likeList.replaceChildren();
- for(const p of s.likeProgress||[]){const row=document.createElement('p');row.textContent=p.name+' · '+p.count+' / '+(st.likeJoinCount??200);likeList.append(row);}
+ for(const p of s.likeProgress||[]){const row=document.createElement('p');row.textContent=p.name+' · '+p.count+' / '+(st.likeJoinCount??0);likeList.append(row);}
  if(!likeList.childElementCount)likeList.textContent=st.likeJoinCount===0?'Beğeniyle giriş kapalı.':'Katılım için beğeni bekleniyor.';
  const choices=$('pendingChoices');choices.replaceChildren();for(const p of s.pending){const row=document.createElement('p');row.textContent=p.name+' · seçim bekliyor ';for(const [gender,label]of [['female','Kadın'],['male','Erkek']]){const b=document.createElement('button');b.textContent=label;b.onclick=()=>control({action:'character',id:p.id,gender});row.append(b);}choices.append(row);}
  const roster=$('viewerList');roster.replaceChildren();for(const p of s.players){const row=document.createElement('p');row.textContent=p.name+' · '+ROLE_LABELS[p.role]+(p.idleProtected?' · Otomatik çıkarılmaz':'')+' ';const select=document.createElement('select');select.ariaLabel=p.name+' karakteri';select.append(new Option('Kadın','female'),new Option('Erkek','male'));select.value=p.gender;select.onchange=()=>control({action:'character',id:p.id,gender:select.value});const remove=document.createElement('button');remove.textContent='Sahneden çıkar';remove.onclick=()=>control({action:'remove',id:p.id});row.append(select,remove);roster.append(row);}

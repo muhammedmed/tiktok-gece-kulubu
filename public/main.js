@@ -1,6 +1,8 @@
 import {giftShot,roleEventPlayer} from './gift-shots.js';
 import {RoleShow} from './role-show.js';
 import {musicianCamera} from './musician-camera.js';
+import {dancerCamera} from './dancer-camera.js';
+import {DanceTour,onFloor} from './dance-tour.js';
 import {HypePartners} from './hype-partners.js';
 import {HypeShow,hypeCamera} from './hype-show.js';
 import {VIP_LOUNGES,vipPoint,nearestLounge,STAGE_DANCERS} from './club-layout.js';
@@ -8,6 +10,7 @@ import {setupStudio} from './studio.js';
 import {SoloShow} from './solo-show.js';
 import {ChatCamera} from './chat-camera.js';
 import {MoneyShow} from './money-show.js';
+import {updatePortrait} from './portrait.js';
 import {createMoneyEffect} from './money-effect.js';
 import {chooseModel} from './wardrobe.js';
 import * as T from 'three';
@@ -32,7 +35,7 @@ const camera=new T.PerspectiveCamera(52,1,.1,90);camera.position.set(0,3.2,9.8);
 const faceFill=new T.DirectionalLight('#fff2e5',.52);scene.add(faceFill,faceFill.target);
 // Render directly with ACES tone mapping: the HDR bloom chain could black out close-ups.
 const adaptiveQuality=new AdaptiveQuality();
-const club=buildClub(scene),people=[],queue=new ShotQueue(),tourDirector=new AutoTour(),roles={};const featured=new Set();let crowdBusy=false,qualityCount=-1,measuredFPS=0;let assets,time=0,lastTitle='',serial=0,lastDemo=0,frameCount=0,labelAccumulator=0,pairShotKey='',pairViewAngle=0,cameraCut=false,announcementUntil=0,endNightUntil=0;
+const club=buildClub(scene),people=[],queue=new ShotQueue(),tourDirector=new AutoTour(),danceTour=new DanceTour(),roles={};const featured=new Set();let crowdBusy=false,qualityCount=-1,measuredFPS=0;let assets,time=0,lastTitle='',serial=0,lastDemo=0,frameCount=0,labelAccumulator=0,pairShotKey='',pairViewAngle=0,cameraCut=false,announcementUntil=0,endNightUntil=0;
 const roleShow=new RoleShow({getPeople:()=>people,spawn,remove:removeGuest,destinationFor,decorate:updateProfile});
 const soloShow=new SoloShow(scene,()=>people),hypeShow=new HypeShow(),hypePartners=new HypePartners(()=>people);let hypeShotId='';
 const captions={portrait:['YAKIN PLAN','Yüz ve figür','Ankara oyun havası'],wide:['GECEYE HOŞ GELDİN','Gece daha yeni başlıyor.','Canlı müzik · Dans · Lounge'],dance:['DANS PİSTİ','Ritmi birlikte yakala.','Gecenin bütün renkleri burada.'],stage:['CANLI SAHNE','Bir saz, bin hikâye.','Saz & darbuka · Bu gece canlı'],vip:['VIP LOUNGE','Gecenin en güzel masası.','Kadife localar · Özel servis']};
@@ -138,7 +141,15 @@ function enqueueHype(e){
 }
 function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();}addEventListener('resize',resize);resize();
 const chatCamera=new ChatCamera();
-function plannedCamera(){featured.clear();const shot=queue.tick(time),tourShot=tourDirector.tick(time,Boolean(shot)||time<queue.returnUntil);let target=new T.Vector3(),pos=new T.Vector3(),fov=52;const portrait=camera.aspect<.8;
+function tourAvailable(view){
+ const present=p=>!p.walking&&!p.giftHidden&&!p.moneyHidden;
+ const lounge=VIP_LOUNGES.find(l=>l.id===view);
+ if(lounge)return people.some(p=>present(p)&&p.role==='vip'&&!p.npc&&nearestLounge(p.root.position).id===lounge.id);
+ if(view==='dance'||view==='wide')return people.some(onFloor);
+ if(view==='stageDancers')return people.some(p=>present(p)&&p.role==='dancer');
+ return people.some(p=>present(p)&&p.role===view);
+}
+function plannedCamera(){featured.clear();const shot=queue.tick(time),tourShot=tourDirector.tick(time,Boolean(shot)||time<queue.returnUntil,tourAvailable);let target=new T.Vector3(),pos=new T.Vector3(),fov=52;const portrait=camera.aspect<.8;
  if(moneyShow.active){const {proxy,receiver}=moneyShow.active;featured.add(proxy);featured.add(receiver);target.copy(proxy.root.position).lerp(receiver.root.position,.5).add(new T.Vector3(0,.95,0));pos.copy(target).add(new T.Vector3(-2.6,1.25,portrait?4.1:3.1));$('cameraName').textContent=time-moneyShow.active.startedAt<1.8?'Para saç · giriş':'Para saç · dansözle gösteri';title('PARA SAÇ',proxy.name,'');return{pos:constrainCamera(pos),target,fov:portrait?52:56,focus:proxy};}
  if(soloShow.active){
   const active=soloShow.active,{person:p,startedAt}=active,origin=p.root.position,age=time-startedAt;
@@ -177,25 +188,30 @@ function plannedCamera(){featured.clear();const shot=queue.tick(time),tourShot=t
   if(plan){featured.add(shot.person);title(shot.title.toLocaleUpperCase('tr'),shot.person.name,'');$('cameraName').textContent='Hediye · '+shot.title+' · çapraz';return plan;}
  }
  if(shot?.protected&&shot.person&&!shot.arrivalAnnounced&&!shot.person.walking){shot.arrivalAnnounced=true;celebrate(shot.person,shot.person.role);}
+ if(shot?.kind==='dancer'&&shot.person&&!shot.person.walking){
+  featured.add(shot.person);title(shot.title.toLocaleUpperCase('tr'),shot.person.name,'');
+  $('cameraName').textContent='Dansöz · tam boy gösteri';
+  return dancerCamera(shot.person,time-queue.started,camera.aspect);
+ }
  const eventPair=!shot?.person?.giftActor&&shot?.person?.role==='dance'&&!shot.person.walking&&shot.person.dancePartner?shot.person:null;
  if(shot?.person&&!eventPair){featured.add(shot.person);const p=shot.person,origin=p.root.position,angle=(shot.cameraAngle??=(p.danceFacing??p.root.rotation.y)+.25)+Math.sin(time*.18)*.12;target.copy(origin).add(new T.Vector3(0,1.15,0));const d=portrait?4.5:3.6;pos.set(origin.x+Math.sin(angle)*d,origin.y+2.3,origin.z+Math.cos(angle)*d);if(!p.walking&&Math.abs(origin.x)>7){if(origin.z<-6){pos.x=Math.sign(origin.x)*8.7;pos.z=origin.z+4.3;}else pos.x=origin.x-Math.sign(origin.x)*2;}if(!p.walking&&['saz','drum'].includes(p.role)){target.copy(origin).add(new T.Vector3(0,.85,0));pos.set(origin.x+.55,origin.y+1.9,origin.z+3.7);}if(!p.walking&&p.role==='vip'){const lounge=nearestLounge(origin);pos.set(...vipPoint(lounge,0,2.33,6.1));target.set(...vipPoint(lounge,0,1.78,-.4));}if(p.walking){const end=p.path.at(-1)||origin;target.copy(origin).lerp(end,.5).add(new T.Vector3(0,1,0));pos.set(target.x,origin.y+2.65,target.z+5.3);}constrainCamera(pos);fov=p.walking?58:p.role==='vip'?68:48;title(shot.title.toLocaleUpperCase('tr'),p.name,p.walking?'Kamera misafirimizi takip ediyor.':'Bu gece sahne senin.');$('cameraName').textContent=p.walking?'Giriş takibi':shot.protected?'Hediye · '+shot.title:'Yakın plan';return{pos,target,fov,focus:p};}
  const selected=(eventPair?'dance':shot?.view)||(time<queue.returnUntil?(queue.returnView||'wide'):tourShot.view),a=time*.075;
  if(selected==='wide'){const busy=people.length>=50;pos.set(Math.sin(a)*3,busy?6.1:4.1,busy?29:13.8);target.set(0,1.2,busy?10:0);fov=portrait?68:62;}
  if(selected==='dance'){
-  const pairs=people.filter(p=>p.role==='dance'&&!p.walking&&p.dancePartner&&p.danceSlot%2===0).sort((a,b)=>{const aa=floorSpot(a.danceSlot),bb=floorSpot(b.danceSlot);return aa.z-bb.z||aa.x-bb.x;});
-  const first=eventPair||pairs[tourShot.danceIndex%Math.max(1,pairs.length)];
-  if(first){featured.add(first);featured.add(first.dancePartner);
+  const pair=eventPair?{first:eventPair,second:eventPair.dancePartner}:danceTour.pick(people,tourShot.id+':'+tourShot.danceIndex);
+  const first=pair?.first;
+  if(first){featured.add(first);if(pair.second)featured.add(pair.second);
    // Short accents only; footwork and full turns always get the complete pair.
-   const closeIndex=duetCloseUp(time,Math.floor(first.danceSlot/2)),closePerson=eventPair||tourShot.danceElapsed<2||tourShot.danceElapsed>3.3?null:closeIndex===0?first:closeIndex===1?first.dancePartner:null;
+   const closeIndex=duetCloseUp(time,Math.floor(first.danceSlot/2),tourShot.danceElapsed,tourShot.danceIndex),closePerson=eventPair?null:closeIndex===0?first:closeIndex===1?pair.second||first:null;
    if(closePerson){const p=closePerson,face=p.facePosition(),angle=(p.danceFacing??p.root.rotation.y)+.85+Math.sin(time*.12)*.06,d=portrait?3.2:3.6;
     target.copy(face).add(new T.Vector3(0,-.38,0));pos.set(face.x+Math.sin(angle)*d,face.y+.25,face.z+Math.cos(angle)*d);fov=portrait?48:44;
     title('ANKARA OYUN HAVASI',p.name,p.dancePhrase);$('cameraName').textContent='Yüz & figür';return{pos,target,fov,focus:p};
    }
-   const second=first.dancePartner,center=first.root.position.clone().lerp(second.root.position,.5),d=portrait?5.7:4.2,key=first.name+tourShot.id+tourShot.danceIndex+portrait,heightBoost=!eventPair&&tourShot.danceIndex%4===3?.9:0;
+   const second=pair.second||first,center=first.root.position.clone().lerp(second.root.position,.5),key=first.root.uuid+tourShot.id+tourShot.danceIndex+portrait,heightBoost=!eventPair&&tourShot.danceIndex%4===3?.9:0;
    if(key!==pairShotKey){pairShotKey=key;let best=Infinity;
     for(const angle of [.15,.8,-.8,1.35,-1.35,2.3,-2.3,Math.PI]){
      const candidate=frameDuet(first.root.position,second.root.position,angle,camera.aspect,portrait?60:54,heightBoost),cx=candidate.pos.x,cz=candidate.pos.z;
-     let score=Math.abs(angle-([.8,-.8,0][tourShot.danceIndex%3]))*.8;
+     let score=Math.abs(Math.atan2(Math.sin(angle-([.8,-.8,.15,1.35,-1.35,Math.PI][tourShot.danceIndex%6])),Math.cos(angle-([.8,-.8,.15,1.35,-1.35,Math.PI][tourShot.danceIndex%6]))))*.8;
      const bounded=constrainCamera(candidate.pos.clone());score+=bounded.distanceTo(candidate.pos)*1000;
      for(const other of people){if(other===first||other===second||other.role!=='dance')continue;
       const ox=other.root.position.x-cx,oz=other.root.position.z-cz,vx=center.x-cx,vz=center.z-cz,u=(ox*vx+oz*vz)/(vx*vx+vz*vz);
@@ -206,7 +222,7 @@ function plannedCamera(){featured.clear();const shot=queue.tick(time),tourShot=t
    }
    const orbit=pairViewAngle+Math.sin(time*.24)*.17,framed=frameDuet(first.root.position,second.root.position,orbit,camera.aspect,portrait?60:54,heightBoost);
    pos.copy(framed.pos);target.copy(framed.target);fov=framed.fov;
-   title('ANKARA OYUN HAVASI',first.name+' & '+second.name,first.dancePhrase||'Karşılıklı adımlar');$('cameraName').textContent='Tam boy · çift takibi';return{pos,target,fov,focus:null,danceTour:true};}
+   title('ANKARA OYUN HAVASI',first.name+(pair.second?' & '+second.name:''),first.dancePhrase||'Karşılıklı adımlar');$('cameraName').textContent=pair.second?'Tam boy · çift takibi':'Tam boy · pist takibi';return{pos,target,fov,focus:null,danceTour:true};}
 
   pos.set(Math.sin(a)*5,3,8.5);target.set(0,1.1,0);fov=portrait?63:55;
  }
@@ -294,13 +310,13 @@ function background(){
 }
 function updateProfile(p,data){
  p.name=data.name;p.tag.querySelector('span').textContent=data.name;
- if(data.avatar&&p.avatar!==data.avatar){p.avatar=data.avatar;const img=document.createElement('img');img.src=data.avatar;img.alt='';img.referrerPolicy='no-referrer';img.onerror=()=>img.remove();p.tag.querySelector('em').replaceChildren(img);}
+ updatePortrait(p,data);
  let bubble=p.tag.querySelector('.chat-bubble');if(data.chat?.until>Date.now()){if(!bubble){bubble=document.createElement('div');bubble.className='chat-bubble';p.tag.append(bubble);}bubble.textContent=data.chat.text;p.chatUntil=data.chat.until;}else bubble?.remove();
 }
 function applyNetwork(s){
  networkState=s;if(!readyForNetwork||!assets)return;
  const initial=networkEpoch===null,reset=networkEpoch!==s.epoch||networkMode!==s.mode,wasPreview=networkMode==='preview'||networkMode===null;
- if(reset){queue.clear();hypePartners.stop();hypeShow.clear();hypeShotId='';$('hypeNotice').hidden=true;chatCamera.clear();endNightUntil=0;$('endNightNotice').hidden=true;announcementUntil=0;$('roleAnnouncement').hidden=true;$('selectionNotice').hidden=true;lastSequence=initial?s.seq:0;networkEpoch=s.epoch;networkMode=s.mode;
+ if(reset){queue.clear();danceTour.clear();hypePartners.stop();hypeShow.clear();hypeShotId='';$('hypeNotice').hidden=true;chatCamera.clear();endNightUntil=0;$('endNightNotice').hidden=true;announcementUntil=0;$('roleAnnouncement').hidden=true;$('selectionNotice').hidden=true;lastSequence=initial?s.seq:0;networkEpoch=s.epoch;networkMode=s.mode;
   if(s.mode!=='preview'||!wasPreview){for(const p of [...people])removeGuest(p);background();}
   if(s.mode==='preview'&&!wasPreview){setCrowd(50);return;}
  }

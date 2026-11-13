@@ -51,24 +51,38 @@ export function dancePose(time,pair=0,side=-1,hype=0){
  const listening=(phrase===4&&side===-1)||(phrase===5&&side===1)||(phrase===6&&!spinning),solo=(phrase===4&&side===1)||(phrase===5&&side===-1),lead=solo?accent:0;
  const clap=listening?accent:0,flourish=phrase===2?accent:0;
  const beltWeight={left:phrase===1||phrase===7?accent:0,right:phrase===7?accent:0};
- const mid=(feet.left[0]+feet.right[0])/2;
+ const mid=(feet.left[0]+feet.right[0])/2,rock=Math.sin(beat*Math.PI),sweep=Math.sin(beat*Math.PI/2),energy=accent*(1-clap);
+ // Let the shoulder, rib cage and hands answer a planted step. Increasing
+ // the gesture, rather than speeding up the clock, keeps excitement smooth.
+ const bodyAccent=energy*(spinning?.35:1),dip=(phrase===3||phrase===7)?accent:0;
  const body={x:spinning?0:mix(mid,feet[step.support][0]*.55,step.lift)*.68,y:-.035-.018*pulse-.018*lead*pulse,
-  z:spinning?0:(feet.left[2]+feet.right[2])*.43+.025*lead,lean:-.025*Math.sin(beat*Math.PI),twist:.045*Math.sin(beat*Math.PI)};
+  z:spinning?0:(feet.left[2]+feet.right[2])*.43+.025*lead,lean:-(.025+.028*bodyAccent)*rock,twist:(.045+.065*bodyAccent)*rock};
+ body.y-=.008*dip*pulse;
  const height=1.37+flourish*.09+lead*.06+hype*.025,bounce=.018*pulse;
  const hands={left:[.42,height+bounce,.27],right:[-.42,height+bounce,.27]};
  for(const [key,sign]of [['left',1],['right',-1]]){
+  const wave=beat*Math.PI/2+sign*side*.75,reply=Math.sin(wave),open=Math.cos(wave);
+  hands[key][0]+=sign*energy*(.025+.04*open);
+  hands[key][1]+=energy*(.085*reply+.025*rock*sign);
+  hands[key][2]+=energy*.045*Math.sin(wave-.65);
+  // Alternating high/low snapping hands, then a clear arm flourish.
+  if(phrase===2){hands[key][1]+=accent*(.10+.10*sign*sweep);hands[key][0]-=sign*.055*accent;}
+  if(spinning){hands[key][0]+=sign*.035*accent;hands[key][1]+=.07*accent;}
   const belt=beltWeight[key];for(let i=0;i<3;i++)hands[key][i]=mix(hands[key][i],[sign*.25,1.10,.025][i],belt);
-  if(phrase===1&&key==='right')hands[key][1]+=accent*.13;
+  if(phrase===1&&key==='right')hands[key][1]+=accent*.22;
+  // Ease into the rig's comfortable overhead reach instead of snapping to a cap.
+  if(hands[key][1]>1.55)hands[key][1]=1.55+.10*Math.tanh((hands[key][1]-1.55)/.10);
   const close=(1+Math.cos(beat*TAU))/2;
   const clapTarget=[sign*(.052+.17*(1-close)),1.28+.015*pulse,.41];
   for(let i=0;i<3;i++)hands[key][i]=mix(hands[key][i],clapTarget[i],clap);
  }
  const snapWeight={left:(1-beltWeight.left)*(1-clap),right:(1-beltWeight.right)*(1-clap)};
- feet[step.moving][1]+=step.lift*(lead*.015+hype*.012);
+ feet[step.moving][1]+=step.lift*(lead*.015+hype*.012+dip*.012);
  if(phrase===3)feet[step.moving][2]+=step.lift*accent*.035;
  const turn=spinning?step.turn:0;
  return {phrase:PHRASES[phrase],stepName:spinning?'Dönüş adımı':STEP_NAMES[style],body,hands,clap,turn,feet,beltWeight,snapWeight,snapBeat:beat,
   heel:[step.moving==='left'?step.lift*.14:0,step.moving==='right'?step.lift*.14:0],
-  shoulder:.017*Math.sin(beat*TAU),wrist:.065*Math.sin(beat*TAU-.3),
-  headYaw:-body.twist*.65,headNod:.007*Math.sin(beat*Math.PI),solo:lead};
+  shoulder:(.017+.025*bodyAccent)*Math.sin(beat*TAU),shoulderSwing:.035*bodyAccent*rock,
+  chestRoll:.022*bodyAccent*rock,chestPitch:.018*bodyAccent*Math.sin(beat*Math.PI-.5),wrist:.065*Math.sin(beat*TAU-.3),
+  headYaw:-body.twist*.65+.055*energy*sweep,headNod:(.007+.018*bodyAccent)*rock,solo:lead};
 }

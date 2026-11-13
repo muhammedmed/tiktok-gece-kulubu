@@ -7,11 +7,18 @@ export function avatarUrl(value) {
 }
 
 export function userAvatar(user = {}) {
-  for (const source of [user.avatarThumb, user.avatarMedium, user.avatarLarge,
-    user.avatar_thumb, user.avatar_medium, user.avatar_large, user.profilePictureUrl, user.profilePicture]) {
-    const candidates = typeof source === 'string' ? [source] : Array.isArray(source) ? source : source?.urlList || source?.url_list || [];
-    if (!Array.isArray(candidates)) continue;
-    for (const candidate of candidates) { const url = avatarUrl(candidate); if (url) return url; }
+  if (!user || typeof user !== 'object') return '';
+  // Euler schema v2: User.profilePicture is an Image with a `url` array.
+  // Keep the earlier connector shapes too, including medium/large fallbacks.
+  for (const source of [user.profilePicture, user.profilePictureMedium, user.profilePictureLarge,
+    user.avatarThumb, user.avatarMedium, user.avatarLarge, user.avatarJpg,
+    user.avatar_thumb, user.avatar_medium, user.avatar_large, user.profilePictureUrl]) {
+    const lists = typeof source === 'string' || Array.isArray(source) ? [source]
+      : [source?.url, source?.urlList, source?.url_list];
+    for (const list of lists) {
+      const candidates = typeof list === 'string' ? [list] : Array.isArray(list) ? list : [];
+      for (const candidate of candidates) { const url = avatarUrl(candidate); if (url) return url; }
+    }
   }
   return '';
 }
@@ -102,6 +109,7 @@ export function eventDecoder(canCue = () => true, catalog = new Map()) {
       seen.add(key);
       if (seen.size > 10000) seen.delete(seen.values().next().value);
       if (type === 'chat') event.messageId = String(msgId);
+      if (type === 'gift') event.giftEventId = key;
     }
     return event;
   };
@@ -109,7 +117,7 @@ export function eventDecoder(canCue = () => true, catalog = new Map()) {
 
 export function openLive({handle, key, onStatus, onEvent, canCue, catalog, waitForLive = false, Socket = WebSocket}) {
   let socket, retryTimer, timeout, stopped = false, retries = 0;
-  let lastStatus, lastDetail, offlineChecks = 0;
+  let lastStatus, lastDetail;
   const gifts=new Map(),decode = eventDecoder(canCue,gifts);
   let waiting=catalog?[]:null;
   function dispatch(msg){const event=decode(msg);if(event)onEvent(event);}
@@ -125,8 +133,10 @@ export function openLive({handle, key, onStatus, onEvent, canCue, catalog, waitF
     if (waitForLive && (code === 4404 || code === 4005)) {
       retries = 0;
       report('waiting', '@' + handle + ' yayını bekleniyor. Yayın açılınca otomatik bağlanılacak.');
-      // Start promptly when the host is setting up; limit requests if the studio stays open overnight.
-      retryTimer = setTimeout(connect, ++offlineChecks <= 3 ? 15000 : 90000);
+      // A host may spend minutes preparing LIVE Studio. Keep polling promptly
+      // throughout that wait so the first gifts are not missed in a 90s gap.
+      // Explicit connection-limit responses still use the separate backoff below.
+      retryTimer = setTimeout(connect, 15000);
       return;
     }
     if (waitForLive && code === 4429) {
@@ -157,7 +167,6 @@ export function openLive({handle, key, onStatus, onEvent, canCue, catalog, waitF
     function connected() {
       clearTimeout(timeout);
       retries = 0;
-      offlineChecks = 0;
       report('live', '@' + handle + ' yayını bağlı');
     }
     function finishRoom(code) {

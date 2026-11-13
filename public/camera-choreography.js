@@ -1,11 +1,12 @@
 import * as T from 'three';
 import {dancePose} from './dance-motion.js';
 // Most of each 32-second passage is a full-body duet. Reserve the feet before turns/taps.
-export function duetCloseUp(time,pair){
+export function duetCloseUp(time,pair,shotAge=null,shotIndex=0){
  for(const offset of [0,.8,1.6]){
   const name=dancePose(time+offset,pair,-1).phrase;
   if(/dönüş|Topuk|topuk/.test(name))return null;
  }
+ if(shotAge!==null)return shotIndex%3===1&&shotAge>=1.4&&shotAge<3.4?Math.floor(shotIndex/3)%2:null;
  const phase=((time%32)+32)%32;
  return phase>=10&&phase<13?0:phase>=25&&phase<28?1:null;
 }

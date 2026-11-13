@@ -2,7 +2,7 @@ import {dancePose,DANCE_BPM,pivotStep,countedStep} from './dance-motion.js';
 
 export const DANCER_FIGURES=['Kalça sekizi','Tek kalça vurgusu','İpek kol dalgası','Gövde dalgası','Omuz titreşimi','Adımlı dönüş','Yana süzülüş','Parmak şıklat ve bakış','Taç ve kol açılışı','Topuk dokunuşu ve nazlı dönüş'];
 export const DANCER_PHRASE_BEATS=8;
-const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};
+const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*x*(x*(x*6-15)+10);};
 const mix=(a,b,w)=>a+(b-a)*w;
 const mixAngle=(a,b,w)=>a+Math.atan2(Math.sin(b-a),Math.cos(b-a))*w;
 const orders=[
@@ -19,71 +19,74 @@ function figureAt(section,style){const index=((section%10)+10)%10,round=Math.flo
 // adjacent figures avoids repeatedly dropping both arms to a neutral pose.
 function figurePose(figure,beat,within,style){
  const a=beat*Math.PI,slow=a*.5,sway=Math.sin(a),side=style%2?-1:1;
+ const emphasis=.75+.25*(.5-.5*Math.cos(beat*Math.PI/2)),pulse=.5-.5*Math.cos(a*2);
  const p={body:{x:0,y:-.042,z:0,lean:0,twist:0,pitch:0},hipTwist:0,hipTilt:0,hipPitch:0,chestRoll:0,chestPitch:0,
   shoulder:.011*Math.sin(a),shoulderSwing:0,wrist:.025*Math.sin(slow),headYaw:0,headNod:0,headTilt:0,turn:0,clap:0,
   hands:{left:[.45,1.34,.24],right:[-.45,1.34,.24]},elbows:{left:[.51,1.20,.15],right:[-.51,1.20,.15]},
   feet:{left:[.15,0,0],right:[-.15,0,0]},heel:[0,0],beltWeight:{left:0,right:0},snapWeight:{left:0,right:0},
   fingerCurl:{left:.11,right:.11},wristFlourish:{left:[.035*Math.sin(slow),.07*Math.cos(slow)],right:[-.035*Math.sin(slow),-.07*Math.cos(slow)]}};
  if(figure===0){
-  p.body.x=.048*sway;p.body.z=.018*Math.sin(a*2);p.hipTwist=.27*sway;p.hipTilt=.115*Math.sin(a*2);
-  p.hands.left=[.50,1.34+.10*Math.sin(slow),.23];p.hands.right=[-.50,1.34-.10*Math.sin(slow),.23];
+  p.body.x=.052*sway;p.body.z=.022*Math.sin(a*2);p.hipTwist=.32*sway;p.hipTilt=.13*Math.sin(a*2);p.chestRoll=-.035*sway;
+  p.hands.left=[.46+.035*Math.cos(slow),1.39+.17*Math.sin(slow),.26];p.hands.right=[-.46+.035*Math.cos(slow),1.39-.17*Math.sin(slow),.26];
   p.headYaw=.09*Math.sin(slow-.4);p.headNod=.018*Math.cos(slow);
  }
  if(figure===1){
-  const drop=.5-.5*Math.cos(a*2);p.hipTilt=side*(.045+.14*drop);p.hipTwist=.13*sway;p.body.x=side*.038;p.body.y-=.028*drop;
-  p.hands.left=[.30,1.74,.22];p.hands.right=[-.31,1.10,.22];p.heel=side>0?[.13*drop,0]:[0,.13*drop];
-  if(side<0){p.hands.left=[.31,1.10,.22];p.hands.right=[-.30,1.74,.22];}
+  const drop=(.5-.5*Math.cos(a*2))*emphasis;p.hipTilt=side*(.035+.19*drop);p.hipTwist=.16*sway;p.body.x=side*.042;p.body.y-=.032*drop;p.chestRoll=-side*.035*drop;
+  const high=[.31+.025*Math.sin(slow),1.70+.055*Math.cos(slow),.24],low=[.32,1.13+.03*Math.sin(slow),.25];
+  p.hands.left=side>0?high:low;p.hands.right=(side>0?low:high).map((n,i)=>i===0?-n:n);p.heel=side>0?[.17*drop,0]:[0,.17*drop];
   p.headYaw=side*.12*(.55+.45*Math.sin(slow));p.headNod=.015*Math.sin(a-.3);p.headTilt=side*.035;
  }
  if(figure===2){
-  p.hipTilt=.075*Math.sin(a*2);p.body.twist=.06*sway;p.shoulder=.025*Math.sin(slow);
+  p.hipTilt=.085*Math.sin(a*2);p.hipTwist=.12*sway;p.body.twist=.06*sway;p.shoulder=.035*Math.sin(slow);
   for(const [key,sign]of sides){const wave=slow+(sign<0?Math.PI:0);
-   p.hands[key]=[sign*(.42+.075*Math.cos(wave)),1.43+.23*Math.sin(wave-.45),.25+.045*Math.cos(wave)];
+   p.hands[key]=[sign*(.40+.085*Math.cos(wave)),1.45+.29*Math.sin(wave-.45),.27+.045*Math.cos(wave)];
    p.elbows[key]=[sign*.51,1.27+.13*Math.sin(wave),.15];p.fingerCurl[key]=.09+.04*Math.sin(wave-.8);
    p.wristFlourish[key]=[.06*Math.sin(wave-1),sign*.12*Math.sin(wave-.7)];
   }
   p.headYaw=.10*Math.sin(slow-.7);p.headTilt=.035*Math.sin(slow);
  }
  if(figure===3){
-  p.chestRoll=.075*sway;p.chestPitch=.085*Math.cos(a);p.hipPitch=-.065*Math.cos(a-.7);p.hipTwist=-.095*sway;
+  p.chestRoll=.095*sway;p.chestPitch=.11*Math.cos(a);p.hipPitch=-.09*Math.cos(a-.7);p.hipTwist=-.12*sway;
   p.body.twist=.055*sway;p.body.y-=.015*(1+Math.sin(a-.65));
-  const open=.5+.5*Math.sin(slow);p.hands.left=[.34+.13*open,1.27+.13*open,.30];p.hands.right=[-.34-.13*open,1.27+.13*open,.30];
+  const open=.5+.5*Math.sin(slow);p.hands.left=[.32+.15*open,1.24+.25*open,.30];p.hands.right=[-.32-.15*open,1.24+.25*open,.30];
   p.headNod=-.032*Math.cos(a-.3);p.headYaw=-p.body.twist*.5;
  }
  if(figure===4){
   // Small alternating accents read as a shimmy without high-frequency shaking.
-  const ripple=Math.sin(a*2);p.hipTilt=.042*ripple+.06*sway;p.shoulder+=.03*ripple;p.shoulderSwing=.04*ripple;
-  p.body.y-=.012*(.5-.5*Math.cos(a*2));p.hands.left=[.33,1.70,.20];p.hands.right=[-.47,1.32,.27];
+  const ripple=Math.sin(a*2)*emphasis;p.hipTilt=.055*ripple+.07*sway;p.shoulder+=.042*ripple;p.shoulderSwing=.055*ripple;
+  p.body.y-=.016*pulse;p.hands.left=[.34+.035*Math.sin(slow),1.66+.075*Math.cos(slow),.24];p.hands.right=[-.47,1.32+.075*Math.sin(slow),.27];
   p.headYaw=.11*Math.sin(slow);p.wristFlourish.left=[.05*Math.sin(a),.11*Math.cos(slow)];
  }
  if(figure===5){
-  const step=pivotStep(Math.max(0,Math.min(8,within)),side);p.turn=step.turn;p.feet=step.feet;
-  p.feet.left[1]*=.7;p.feet.right[1]*=.7;
-  const open=Math.sin(Math.PI*Math.max(0,within)/8)**2;
+  // Finish the eight transfers before the arm transition. Both feet settle
+  // at beat six; crossfading cannot drag a supporting foot across the stage.
+  const travel=Math.max(0,Math.min(8,within*8/6)),step=pivotStep(travel,side);p.turn=step.turn;p.feet=step.feet;
+  p.feet.left[1]*=.85;p.feet.right[1]*=.85;
+  const open=Math.sin(Math.PI*travel/8)**2;
   p.hands.left=[.30+.17*open,1.70-.25*open,.22];p.hands.right=[-.30-.17*open,1.70-.25*open,.22];
   p.hipTilt=.045*Math.sin(a*2);p.headYaw=-side*.10*Math.sin(Math.PI*Math.max(0,within)/8);
  }
  if(figure===6||figure===9){
-  const step=countedStep(beat,figure===6?0:2);p.feet=step.feet;
-  for(const key of ['left','right']){p.feet[key][0]*=.78;p.feet[key][1]*=.66;p.feet[key][2]*=.65;}
+  const travel=Math.max(0,Math.min(8,within*8/6)),step=countedStep(travel,figure===6?0:2);p.feet=step.feet;
+  for(const key of ['left','right']){p.feet[key][0]=mix(key==='left'?.15:-.15,p.feet[key][0],.9);p.feet[key][1]*=.85;p.feet[key][2]*=.85;}
   // Follow a fraction of the feet's midpoint; keep the torso inside its
   // reserved stage space while the alternating feet take the wider steps.
   p.body.x=(p.feet.left[0]+p.feet.right[0])*.15;p.body.z=(p.feet.left[2]+p.feet.right[2])*.22;
-  p.hipTwist=(figure===6?.20:.12)*Math.cos(a);p.hipTilt=.10*sway;p.heel=step.moving==='left'?[step.lift*.12,0]:[0,step.lift*.12];
-  if(figure===6){p.hands.left=[.47,1.37+.10*Math.sin(slow),.24];p.hands.right=[-.47,1.37-.10*Math.sin(slow),.24];p.headYaw=.11*Math.sin(slow-.3);}
+  p.hipTwist=(figure===6?.24:.16)*Math.cos(a);p.hipTilt=.12*sway;p.heel=step.moving==='left'?[step.lift*.16,0]:[0,step.lift*.16];
+  if(figure===6){p.hands.left=[.46,1.41+.16*Math.sin(slow),.25];p.hands.right=[-.46,1.41-.16*Math.sin(slow),.25];p.headYaw=.14*Math.sin(slow-.3);}
   else{p.hands.left=[.33,1.55+.055*Math.sin(slow),.29];p.hands.right=[-.32,1.12,.22];p.snapWeight.left=.78;
    p.body.twist=.075*Math.sin(slow);p.headYaw=.15*Math.sin(slow-.35);p.headNod=.025*Math.cos(slow-.2);p.headTilt=.04*Math.sin(slow-.4);
    p.wristFlourish.left=[.045*Math.sin(a),.11*Math.sin(slow-.4)];}
  }
  if(figure===7){
-  const reply=.5+.5*Math.sin(slow);p.hipTilt=.09*Math.sin(a*2);p.hipTwist=.13*sway;p.body.twist=.07*Math.sin(slow);
-  p.hands.left=[.37,1.42+.15*reply,.29];p.hands.right=[-.37,1.57-.15*reply,.29];
+  const reply=.5+.5*Math.sin(slow);p.hipTilt=.11*Math.sin(a*2);p.hipTwist=.17*sway;p.body.twist=.085*Math.sin(slow);
+  p.hands.left=[.34+.075*reply,1.31+.33*reply,.29];p.hands.right=[-.415+.075*reply,1.64-.33*reply,.29];
   p.snapWeight.left=.18+.77*smooth(reply);p.snapWeight.right=.18+.77*smooth(1-reply);
   p.headYaw=.16*Math.sin(slow-.3);p.headNod=.022*Math.cos(slow);p.headTilt=.045*Math.sin(slow-.35);
   p.wristFlourish.left=[.04*Math.sin(a),.09*Math.cos(slow)];p.wristFlourish.right=[-.04*Math.sin(a),-.09*Math.cos(slow)];
  }
  if(figure===8){
-  const open=.5-.5*Math.cos(slow);p.hipTilt=.095*sway;p.hipTwist=.15*Math.sin(a-.5);p.chestRoll=.025*Math.cos(slow);
+  const open=.5-.5*Math.cos(slow);p.hipTilt=.12*sway;p.hipTwist=.19*Math.sin(a-.5);p.chestRoll=.035*Math.cos(slow);
   p.hands.left=[.28+.20*open,1.76-.35*open,.22];p.hands.right=[-.28-.20*open,1.76-.35*open,.22];
   p.headYaw=.11*Math.sin(slow-.3);p.headNod=-.024*(1-open);p.headTilt=.025*Math.sin(slow);
   p.wristFlourish.left=[.06*Math.sin(slow-.7),.11*Math.sin(slow)];p.wristFlourish.right=[-.06*Math.sin(slow-.7),-.11*Math.sin(slow)];

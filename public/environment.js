@@ -1,6 +1,7 @@
 import * as T from 'three';
 import {ROOM,FLOOR,VIP_LOUNGES,vipPoint} from './club-layout.js';
 import {batchRoom} from './static-batch.js';
+import {neonFloor} from './neon-floor.js';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
 const materialCache=new Map();
 export const mat=(color,metalness=0,roughness=.6,extra={})=>{const key=JSON.stringify([color,metalness,roughness,Object.fromEntries(Object.entries(extra).map(([k,v])=>[k,v?.isTexture?v.uuid:v]))]);if(!materialCache.has(key)){const material=new T.MeshStandardMaterial({color,metalness,roughness,...extra});material.userData.shared=true;materialCache.set(key,material);}return materialCache.get(key);};
@@ -61,19 +62,19 @@ export function buildClub(scene){
  for(let i=0;i<55;i++)cyl([-6.35+i*.235,3.05,-10.55],.17,.17,4.8,velvet,room);
  const archPoints=[];for(let i=0;i<=40;i++){const a=i/40*Math.PI;archPoints.push([Math.cos(a)*5.7,2.4+Math.sin(a)*3.5,-10.1]);}tube(archPoints,.055,gold,room);for(const x of [-5.7,5.7])cyl([x,1.5,-10.1],.055,.055,1.8,gold,room);
  box([0,3.6,-10.08],[8.4,3.2,.12],mat('#180f23',.4,.4),room);
- const title=textPlane('Â L Â',7.4,2.2,'#f3d6a3',200);title.position.set(0,4.1,-9.98);room.add(title);
+ const title=textPlane('AKŞAMÜSTÜ',7.7,1.8,'#f3d6a3',180);title.position.set(0,4.1,-9.98);room.add(title);
  const sub=textPlane('A N K A R A   G E C E L E R İ',5.2,.8,'#cf8dbe',66);sub.position.set(0,3.05,-9.95);room.add(sub);
  const bars=[];for(let i=0;i<43;i++){const b=box([-5.65+i*.27,1.35,-10],[.12,1.2,.06],i%3?warm:pink,room,.02);bars.push(b);}
  for(const x of [-6,6]){box([x,1.7,-6.8],[.72,2.1,.62],black,room);for(const y of [1.2,1.9,2.45]){const cone=cyl([x,y,-6.47],.23,.23,.03,mat('#20202a',.3,.8),room);cone.rotation.x=Math.PI/2;orb([x,y,-6.44],[.08,.08,.03],black,room);}}
  // DJ station, visible platters, faders and headphones.
  box([0,1.25,-8.1],[3.1,1.15,.85],black,room,.07);box([0,1.82,-8.1],[3.25,.12,1.0],mat('#26212d',.6,.22),room);
- box([0,1.15,-7.66],[2.9,.55,.025],mat('#4a2948',.5,.35),room);const dj=textPlane('ÂLÂ  /  AFTER DARK',2.3,.5,'#e1b980',68);dj.position.set(0,1.2,-7.62);room.add(dj);
+ box([0,1.15,-7.66],[2.9,.55,.025],mat('#4a2948',.5,.35),room);const dj=textPlane('AKŞAMÜSTÜ',2.5,.5,'#e1b980',140);dj.position.set(0,1.2,-7.62);room.add(dj);
  for(const x of [-.95,.95]){cyl([x,1.9,-8.1],.29,.29,.03,black,room);cyl([x,1.922,-8.1],.19,.19,.012,gold,room);for(let i=0;i<4;i++)box([x-.22+i*.14,1.91,-7.76],[.07,.015,.06],i%2?pink:blue,room,.003);}
  for(let i=0;i<6;i++){box([-.32+i*.13,1.9,-8.1],[.018,.02,.35],gold,room,.002);box([-.32+i*.13,1.925,-8.18+(i%3)*.1],[.07,.03,.04],cream,room,.004);}
- // Circular smoked-glass dance floor, concentric LED rings and radial inlays.
+ // Square neon panels sit inside the existing circular floor boundary.
  cyl([0,.025,FLOOR.z],FLOOR.r,FLOOR.r,.06,mat('#151320',.05,.62,{envMapIntensity:.1}),room);
- for(const r of [FLOOR.r*.25,FLOOR.r*.5,FLOOR.r*.75,FLOOR.r]){const ring=mesh(new T.TorusGeometry(r,.016,8,112),r===FLOOR.r?warm:blue,[0,.058,FLOOR.z],room);ring.rotation.x=Math.PI/2;}
- for(let i=0;i<16;i++){const a=i/16*Math.PI*2;const strip=box([Math.sin(a)*FLOOR.r/2,.056,FLOOR.z+Math.cos(a)*FLOOR.r/2],[.012,.008,FLOOR.r],i%3?blue:pink,room,.002);strip.rotation.y=a;}
+ const ledFloor=neonFloor(FLOOR.r-.03);ledFloor.surface.position.set(FLOOR.x,.056,FLOOR.z);room.add(ledFloor.surface);
+ for(const [r,m]of [[FLOOR.r,glow('#9971de',1.1)],[FLOOR.r-.12,glow('#42a6bf',.65)]]){const ring=mesh(new T.TorusGeometry(r,.012,8,128),m,[0,.058,FLOOR.z],room);ring.rotation.x=Math.PI/2;}
  const seats=[];let number=1;
  // Rounded seating follows the room perimeter; leave the stage sector open.
  for(let i=1;i<15;i++){const a=-2.15+i/15*4.3,x=Math.sin(a)*(ROOM.r-3.2),z=ROOM.z+Math.cos(a)*(ROOM.r-3.2),yaw=a+Math.PI;
@@ -110,6 +111,6 @@ export function buildClub(scene){
  for(const side of [-1,1])for(const z of [0,4.2,8.4]){const light=new T.PointLight('#efb272',1.0,5,2);light.position.set(side*8.4,2.1,z);scene.add(light);}
  const beams=[];for(let i=0;i<4;i++){const x=-4.5+i*3;const spot=new T.SpotLight(i%2?'#925bd6':'#ee5e8b',12,32,.37,.8,1.8);spot.position.set(x,6.7,-6.4);scene.add(spot,spot.target);spot.target.position.set(x*.6,0,1);if(i===1){spot.castShadow=true;spot.shadow.mapSize.set(1024,1024);spot.shadow.bias=-.0003;spot.shadow.normalBias=.03;}cyl([x,6.65,-6.4],.14,.2,.38,black,room);const cone=mesh(new T.ConeGeometry(2.1,10,32,1,true),new T.MeshBasicMaterial({color:i%2?'#9b89fa':'#ffa5bb',transparent:true,opacity:.006,depthWrite:false,side:T.DoubleSide,blending:T.AdditiveBlending}),[x,2.3,-3],room);cone.visible=true;beams.push({spot,cone,x});}
  const ceiling=new T.Group();room.add(ceiling);for(const x of [-10,-5,5,10])box([x,6.8,-1],[.04,.04,18],gold,ceiling,.005);
- const batchedDraws=batchRoom(room,[...bars,...beams.map(b=>b.cone)]);
- return {seats,bars,beams,room,batchedDraws,update(t){bars.forEach((b,i)=>{const h=.2+(.5+.5*Math.sin(t*2.3+i*.62))*.75;b.scale.y=h;b.position.y=.75+h*.6;});beams.forEach(({spot,cone,x},i)=>{spot.target.position.set(x+Math.sin(t*.22+i)*2,0,FLOOR.z+Math.cos(t*.17+i)*7);const mid=spot.position.clone().lerp(spot.target.position,.5);cone.position.copy(mid);cone.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),spot.position.clone().sub(spot.target.position).normalize());});}};
+ const batchedDraws=batchRoom(room,[ledFloor.surface,...bars,...beams.map(b=>b.cone)]);
+ return {seats,bars,beams,room,batchedDraws,update(t){ledFloor.update(t);bars.forEach((b,i)=>{const h=.2+(.5+.5*Math.sin(t*2.3+i*.62))*.75;b.scale.y=h;b.position.y=.75+h*.6;});beams.forEach(({spot,cone,x},i)=>{spot.target.position.set(x+Math.sin(t*.22+i)*2,0,FLOOR.z+Math.cos(t*.17+i)*7);const mid=spot.position.clone().lerp(spot.target.position,.5);cone.position.copy(mid);cone.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),spot.position.clone().sub(spot.target.position).normalize());});}};
 }

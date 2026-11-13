@@ -9,7 +9,7 @@ export class ClubSession{
  constructor(settings,preferences={},now=Date.now){this.settings=settings;this.preferences=preferences;this.now=now;this.reset();}
  reset(){this.epoch=randomUUID();this.players=new Map();this.pending=new Map();this.profiles=new Map();this.likeProgress=new Map();this.waitlist=new Map();this.activityPausedAt=null;this.events=[];this.sequence=0;this.roleSequence=0;this.variant=0;this.mode='preview';this.notices=[];}
  countLikes(event){
-  const target=this.settings.likeJoinCount??200,id=String(event.id||''),amount=event.amount;
+  const target=this.settings.likeJoinCount??0,id=String(event.id||''),amount=event.amount;
   if(!target||!id||!Number.isSafeInteger(amount)||amount<=0)return;
   // Likes must never replace an existing/queued paid role or replay its camera shot.
   if(this.players.has(id)||this.pending.has(id)||this.waitlist.has(id)){this.likeProgress.delete(id);return;}

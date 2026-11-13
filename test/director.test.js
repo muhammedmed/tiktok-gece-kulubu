@@ -3,12 +3,20 @@ test('role action interrupts entrance and repeated gifts do not flood queue',()=
 test('event finishes, wide shot breathes, then queued event starts',()=>{const q=new ShotQueue();q.push({key:'a',priority:2,duration:5},0);q.tick(0);q.push({key:'b',priority:2,duration:5},1);assert.equal(q.tick(5),null);assert.equal(q.tick(7),null);assert.equal(q.tick(8).key,'b');});
 test('entrance keeps the camera through travel and five seconds after arrival',()=>{const q=new ShotQueue(),person={walking:true};let started=0,released=0;q.push({key:'join',person,priority:1,duration:60,followArrival:true,onStart:()=>started++,onRelease:()=>released++},0);q.tick(0);q.push({key:'drum',priority:3,duration:10},1);assert.equal(q.tick(9).key,'join');person.walking=false;assert.equal(q.tick(10).key,'join');assert.equal(q.tick(14.99).key,'join');assert.equal(q.tick(15),null);assert.equal(q.tick(17),null);assert.equal(q.tick(18).key,'drum');assert.equal(started,1);assert.equal(released,1);});
 test('clearing and bounded overflow release waiting entrances',()=>{const q=new ShotQueue();let released=0;for(let i=0;i<15;i++)q.push({key:String(i),priority:1,duration:60,onRelease:()=>released++},0);assert.equal(q.items.length,12);assert.equal(released,3);q.tick(0);q.clear();assert.equal(released,15);});
-test('tour alternates fast dance visits with slower VIP, musicians and waiter, pausing during events',async()=>{
- const {AutoTour,TOUR_STOPS}=await import('../public/director.js');const t=new AutoTour();assert.equal(t.tick(0).view,'wide');assert.equal(t.tick(3).view,'wide');assert.equal(t.tick(33,true).view,'wide');assert.equal(t.tick(34).view,'dance');
- assert.equal(t.tick(38.9).danceIndex,0);assert.equal(t.tick(39).danceIndex,1);assert.equal(t.tick(44).danceIndex,2);assert.equal(t.tick(49).view,'saz');assert.equal(t.tick(56.9).view,'saz');assert.equal(t.tick(57).danceIndex,3);
+test('automatic tour prioritizes floor viewers and pauses during gift events',async()=>{
+ const {AutoTour,TOUR_STOPS}=await import('../public/director.js');const t=new AutoTour();assert.equal(t.tick(0).view,'wide');assert.equal(t.tick(2).view,'wide');assert.equal(t.tick(32,true).view,'wide');assert.equal(t.tick(33).view,'dance');
+ assert.equal(t.tick(37.9).danceIndex,0);assert.equal(t.tick(38).danceIndex,1);assert.equal(t.tick(43).danceIndex,2);assert.equal(t.tick(57).view,'waiter');assert.equal(t.tick(61.9).view,'waiter');assert.equal(t.tick(62).danceIndex,5);
  const cycle=new AutoTour(),visited=new Set();let now=0;cycle.tick(now);for(const [view,duration] of TOUR_STOPS){assert.equal(cycle.tick(now).view,view);visited.add(view);now+=duration;}
  for(const view of ['dance','saz','drum','vipLeft','vipRight','vipOuterLeft','vipOuterRight','waiter','dj'])assert.ok(visited.has(view),view);assert.ok(!visited.has('guests'));
- for(let i=2;i<TOUR_STOPS.length;i+=2){assert.equal(TOUR_STOPS[i-1][0],'dance');assert.ok(TOUR_STOPS[i][1]>=7);}
+ for(let i=2;i<TOUR_STOPS.length;i+=2){assert.equal(TOUR_STOPS[i-1][0],'dance');assert.ok(TOUR_STOPS[i][1]<=7);}
+ const floorSeconds=TOUR_STOPS.filter(([view])=>view==='dance').reduce((sum,[,duration])=>sum+duration,0),total=TOUR_STOPS.reduce((sum,[,duration])=>sum+duration,0);assert.ok(floorSeconds/total>.79);
+});
+test('unoccupied tour destinations are skipped, including a VIP that becomes empty mid-shot',async()=>{
+ const {AutoTour,TOUR_STOPS}=await import('../public/director.js');const tour=new AutoTour();let now=0;
+ for(let i=0;i<100;i++){const shot=tour.tick(now,false,view=>!view.startsWith('vip'));assert.ok(!shot.view.startsWith('vip'));now+=4;}
+ tour.index=TOUR_STOPS.findIndex(([view])=>view==='vipLeft');tour.elapsed=3;
+ assert.equal(tour.tick(now,false,view=>!view.startsWith('vip')).view,'dance');
+ const before=tour.tick(now).danceIndex;tour.resumeDance();assert.ok(tour.tick(now).danceIndex>before);
 });
 test('same guest role upgrade replaces stale travel shots without a second queue entry',()=>{const q=new ShotQueue(),person={walking:true};q.push({key:'join',person,priority:1,duration:40,followArrival:true},0);q.tick(0);q.push({key:'vip',person,priority:3,duration:50,followArrival:true},3);assert.equal(q.tick(3).key,'vip');assert.equal(q.items.length,0);q.push({key:'other',person:{},priority:1,duration:5},4);assert.equal(q.items.length,1);});
 

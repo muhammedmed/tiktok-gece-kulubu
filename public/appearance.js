@@ -1,5 +1,5 @@
 import * as T from 'three';
-import {CLUB_LOOK_OFFSETS,CLUB_PALETTES,clubFabricRegions} from './club-fashion.js';
+import {CLUB_LOOK_OFFSETS,clubLook,clubFabricRegions,eveningFabricGLSL} from './club-fashion.js';
 import {DANCER_COLORS,dancerLook} from './dancer-palette.js';
 export {DANCER_LOOKS,dancerLook} from './dancer-palette.js';
 // UV landmarks checked against each Rocketbox atlas. These are material layers,
@@ -39,7 +39,7 @@ export function appearanceVariant(modelName,variant=0){
  const offset=CLUB_LOOK_OFFSETS[modelName]??[...modelName].reduce((n,c)=>n+c.charCodeAt(0),0)%6;
  const index=((Math.floor(variant/10)+offset)%6+6)%6,look={...base,...(index?palettes[index-1]:{}),index};
  // Natural dark hair on men; avoid the gray dye that made the whole crowd look older.
- if(modelName.includes('female'))Object.assign(look,CLUB_PALETTES[index]);
+ if(modelName.includes('female'))Object.assign(look,clubLook(modelName,variant));
  if(!modelName.includes('female'))look.hair=['#30231c','#503325','#382720','#231b18','#673f28','#33251e'][index];
  return look;
 }
@@ -55,7 +55,7 @@ export function fabricMask(modelName){
  return '(1.0-smoothstep(.13,.21,lum))*max(step(.315,uv.x)*step(uv.x,.685),step(.29,uv.y)*step(uv.y,.60))';
 }
 export function sharedMaterial(assets,source,options){
- assets.materialPool??=new Map();const look=appearanceVariant(options.modelName,options.variant),key=source.uuid+options.modelName+look.index+(options.role==='dancer'?'-dancer-'+options.variant%5:'');
+ assets.materialPool??=new Map();const look=appearanceVariant(options.modelName,options.variant),key=source.uuid+options.modelName+look.index+(options.eveningOutfit?'-evening':'')+(options.role==='dancer'?'-dancer-'+options.variant%5:'');
  if(!assets.materialPool.has(key))assets.materialPool.set(key,styleMaterial(source,options));
  return assets.materialPool.get(key);
 }
@@ -65,7 +65,7 @@ vec3 clubDye(vec3 source,vec3 tint){float l=dot(source,vec3(.2126,.7152,.0722));
 // GLSL pow has undefined results for negative bases, including pow(x, 2.0).
 float clubSquare(float x){return x*x;}
 `;
-export function styleMaterial(source,{modelName,gender,variant=0,role}){
+export function styleMaterial(source,{modelName,gender,variant=0,role,eveningOutfit=false}){
  const m=new T.MeshPhysicalMaterial();T.MeshStandardMaterial.prototype.copy.call(m,source);
  const face=/_head/i.test(source.name),hair=/_opacity/i.test(source.name),look=appearanceVariant(modelName,variant);
  const costume=role==='dancer';if(costume){Object.assign(look,dancerLook(variant));look.cloth=DANCER_COLORS[((variant%5)+5)%5];}
@@ -73,16 +73,23 @@ export function styleMaterial(source,{modelName,gender,variant=0,role}){
  const fabric=youngGuest?clubFabricRegions(modelName):null;
  m.metalness=0;m.roughness=face?.49:hair?.48:evening?.46:.68;m.envMapIntensity=face?.32:.38;
  m.specularIntensity=face?.28:hair?.48:.3;if(costume&&face){m.specularIntensity=.36;m.roughness=.53;m.normalScale.multiplyScalar(.58);}m.sheen=face||hair?0:evening?.5:.22;m.sheenRoughness=.68;m.sheenColor.set('#c9b8ae');
- if(youngGuest&&face){m.roughness=.57;m.specularIntensity=.22;m.normalScale.multiplyScalar(.32);}
+ if(youngGuest&&face){m.roughness=.54;m.specularIntensity=.30;m.normalScale.multiplyScalar(.46);}
  if(youngGuest&&hair){m.roughness=.68;m.specularIntensity=.20;m.envMapIntensity=.25;}
- if(youngGuest&&!face&&!hair){m.roughness=fabric.satin;m.normalScale.multiplyScalar(.38);m.sheen=.34;m.sheenRoughness=.55;m.sheenColor.set(look.cloth);}
+ if(youngGuest&&!face&&!hair){m.roughness=eveningOutfit?look.roughness:fabric.satin;m.normalScale.multiplyScalar(.38);m.sheen=.34;m.sheenRoughness=.55;m.sheenColor.set(look.cloth);}
+ if(eveningOutfit&&!face&&!hair){m.roughnessMap=null;m.metalnessMap=null;}
  if(costume&&hair){m.roughness=.64;m.specularIntensity=.28;}
- if(hair){m.forceSinglePass=true;m.alphaTest=youngGuest?.14:.19;m.transparent=false;m.depthWrite=true;m.side=T.DoubleSide;}
+ if(hair){m.forceSinglePass=true;m.alphaTest=youngGuest?.075:.19;m.transparent=false;m.depthWrite=true;m.side=T.DoubleSide;}
  if(!look){return m;}
  const uniforms={clubBottom:{value:new T.Color(look.bottom||'#161923')},clubSkin:{value:new T.Color(look.skin||'#d3a184')},clubSkinReference:{value:new T.Color(modelName==='female-adult-17'?'#cd9977':'#c58f6d')},clubBlush:{value:new T.Color(look.blush||'#c87574')},clubHair:{value:new T.Color(look.hair)},clubCloth:{value:new T.Color(look.cloth)},clubLip:{value:new T.Color(look.lip)},clubEye:{value:new T.Color(look.eye)},clubMakeup:{value:look.makeup},clubTexel:{value:new T.Vector2(1/(source.map?.image?.width||1024),1/(source.map?.image?.height||1024))}};
  if(costume&&!face&&!hair){m.normalMap=null;m.bumpMap=null;m.roughnessMap=null;m.roughness=.58;m.sheen=.12;m.sheenColor.set('#eac682');}
  m.onBeforeCompile=shader=>{
   Object.assign(shader.uniforms,uniforms);
+  if(eveningOutfit&&!face&&!hair){
+   shader.uniforms.clubPattern={value:look.pattern};
+   shader.vertexShader='attribute vec3 eveningRest;attribute float eveningArm,eveningHand;varying vec3 vEveningRest;varying float vEveningArm,vEveningHand;\n'+shader.vertexShader;
+   shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvEveningRest=eveningRest;vEveningArm=eveningArm;vEveningHand=eveningHand;');
+   shader.fragmentShader='varying vec3 vEveningRest;varying float vEveningArm,vEveningHand;uniform float clubPattern;\n'+eveningFabricGLSL+shader.fragmentShader;
+  }
   if(costume&&!face&&!hair){shader.vertexShader='attribute float costumeCoverage;attribute float costumeTorso;varying float vCostumeTorso;attribute vec3 costumeRestPosition;varying float vCostumeCoverage;varying vec3 vCostumeRest;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvCostumeCoverage=costumeCoverage;vCostumeRest=costumeRestPosition;vCostumeTorso=costumeTorso;');shader.fragmentShader='varying float vCostumeTorso;varying float vCostumeCoverage;varying vec3 vCostumeRest;\n'+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <map_fragment>','#include <map_fragment>\nif(vCostumeRest.y>.125&&vCostumeCoverage<1.0)discard;');}
 
   shader.fragmentShader='uniform vec3 clubBottom,clubHair,clubCloth,clubLip,clubEye,clubSkin,clubSkinReference,clubBlush;uniform float clubMakeup;uniform vec2 clubTexel;\n'+helpers+shader.fragmentShader;
@@ -96,7 +103,7 @@ export function styleMaterial(source,{modelName,gender,variant=0,role}){
    ${youngGuest?`float underEyes=clubOval(uv,vec2(.426,.315),vec2(.036,.022))+clubOval(uv,vec2(.574,.315),vec2(.036,.022));
    diffuseColor.rgb=mix(diffuseColor.rgb,soft,underEyes*.28);
    diffuseColor.rgb+=vec3(.020,.012,.009)*skinArea;base=diffuseColor.rgb;`:''}
-   ${costume?`// Tint skin only; keep iris, teeth, nostrils, brows and the hair islands intact.
+   ${costume||eveningOutfit?`// Tint skin only; keep iris, teeth, nostrils, brows and the hair islands intact.
    float complexion=step(uv.y,.79)*smoothstep(.035,.12,base.r-base.g)*smoothstep(.025,.10,lum);
    vec3 balanced=base*clubSkin/max(clubSkinReference,vec3(.03));
    base=mix(base,balanced,complexion*.82);diffuseColor.rgb=base;`:''}
@@ -127,7 +134,12 @@ export function styleMaterial(source,{modelName,gender,variant=0,role}){
    diffuseColor.rgb=mix(diffuseColor.rgb,clubLip*(.55+lum*1.3),min(1.0,lips*.94*clubMakeup));
    diffuseColor.rgb=mix(diffuseColor.rgb,clubEye*(.55+lum),min(1.0,shadow)*.57*clubMakeup);
    diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.018,.009,.016),min(1.0,eyeliner)*.76);
-   diffuseColor.rgb=mix(diffuseColor.rgb,${costume||youngGuest?'clubBlush':'vec3(.43,.095,.13)'},min(1.0,blush)*${costume?'.24':'.12'}*clubMakeup);
+   diffuseColor.rgb=mix(diffuseColor.rgb,${costume||youngGuest?'clubBlush':'vec3(.43,.095,.13)'},min(1.0,blush)*${costume?'.24':eveningOutfit?'.19':'.12'}*clubMakeup);
+   ${eveningOutfit?`float lipLine=clubOval(uv,vec2(.5,.408),vec2(.039,.003));
+   diffuseColor.rgb=mix(diffuseColor.rgb,clubLip*.36,lipLine*.35);
+   float lipShine=clubOval(uv,vec2(.493,.416),vec2(.021,.004));diffuseColor.rgb+=vec3(.08,.037,.042)*lipShine;
+   float brows=clubOval(uv,vec2(.424,.243),vec2(.036,.006))+clubOval(uv,vec2(.576,.243),vec2(.036,.006));
+   diffuseColor.rgb=mix(diffuseColor.rgb,clubHair*.45,min(1.,brows)*.30);`:''}
    ${costume||youngGuest?`float highlight=clubOval(uv,vec2(.382,.326),vec2(.036,.012))+clubOval(uv,vec2(.618,.326),vec2(.036,.012));diffuseColor.rgb+=vec3(.06,.042,.024)*highlight;`:''}
    diffuseColor.rgb=clamp((diffuseColor.rgb-vec3(.18))*1.055+vec3(.18),0.0,1.0);`:''}
   `;
@@ -153,6 +165,24 @@ export function styleMaterial(source,{modelName,gender,variant=0,role}){
    diffuseColor.rgb=mix(base,satin,top*.98);
    diffuseColor.rgb=mix(diffuseColor.rgb,clubBottom*(.72+sqrt(folds)*.8),bottom*.96);
    diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.022,.019,.025)*(.8+sqrt(folds)),shoes*.94);
+  `;
+  if(eveningOutfit&&!face&&!hair)layer+=`
+   // Replace the old trousers and skirt with one fitted, bone-weighted dress.
+   if(vEveningRest.y<.99&&vEveningArm<.01)discard;
+   float neckline=${['female-party-01','female-adult-03'].includes(modelName)?'1.31+min(abs(vEveningRest.x)*.62,.085)':'1.40'};
+   float bodice=(1.-smoothstep(.22,.25,abs(vEveningRest.x)))*(1.-smoothstep(neckline,neckline+.015,vEveningRest.y));
+   top=max(top,bodice);
+   vec3 cloth=eveningFabric(uv*vec2(1.4,1.1),clubCloth,clubPattern)*(.94+sqrt(folds)*.15);
+   float laceArea=smoothstep(1.36,1.44,vEveningRest.y)+smoothstep(.23,.34,abs(vEveningRest.x));
+   if(clubPattern>.5&&clubPattern<1.5){vec2 q=fract(uv*vec2(15.,22.))-.5;float flower=eveningLine(length(q)-(.24+.06*cos(atan(q.y,q.x)*5.)),.025);
+    cloth=mix(cloth,mix(clubSkin*.28,cloth,flower),clamp(laceArea,0.,1.)*.66);}
+   diffuseColor.rgb=mix(diffuseColor.rgb,cloth,top*.99);
+   float bare=(1.-top)*(1.-bottom)*smoothstep(.035,.12,base.r-base.g)*step(.99,vEveningRest.y);
+   diffuseColor.rgb=mix(diffuseColor.rgb,base*clubSkin/max(clubSkinReference,vec3(.03)),bare*.75);
+   // Hands keep their original nail, knuckle and palm texture. Atlas clothing
+   // masks and the skirt cutoff must never paint or amputate the fingers.
+   vec3 handSkin=base*mix(vec3(1.),clubSkin/max(clubSkinReference,vec3(.03)),.75);
+   diffuseColor.rgb=mix(diffuseColor.rgb,handSkin,smoothstep(.20,.85,vEveningHand));
   `;
   if(costume&&!face&&!hair)layer=`
    vec2 uv=vMapUv;vec3 base=diffuseColor.rgb;vec3 p=vCostumeRest;
@@ -187,7 +217,7 @@ export function styleMaterial(source,{modelName,gender,variant=0,role}){
   shader.fragmentShader=shader.fragmentShader.replace('#include <map_fragment>','#include <map_fragment>\n'+layer);
   if(face&&gender==='female')shader.fragmentShader=shader.fragmentShader.replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\nroughnessFactor=mix(roughnessFactor,.29,clubOval(vMapUv,vec2(.5,.407),vec2(.048,.024))*.8);');
  };
- m.customProgramCacheKey=()=>`club-look-v15-${gender}-${modelName}-${face?'face':hair?'hair':'cloth'}-${costume?'costume':'guest'}`;
+ m.customProgramCacheKey=()=>`club-look-v17-${gender}-${modelName}-${face?'face':hair?'hair':'cloth'}-${costume?'costume':eveningOutfit?'evening':'guest'}`;
  const distant=new T.MeshStandardMaterial();T.MeshStandardMaterial.prototype.copy.call(distant,m);distant.onBeforeCompile=m.onBeforeCompile;distant.customProgramCacheKey=()=>m.customProgramCacheKey()+'-distant';distant.forceSinglePass=true;m.userData.distantMaterial=distant;
  return m;
 }

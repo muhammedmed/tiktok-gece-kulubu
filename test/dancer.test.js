@@ -29,3 +29,16 @@ test('oriental choreography cycles through ten figures with grounded and finite 
 });
 
 test('figure transitions keep hands and elbows continuous rather than snapping to new poses',()=>{for(let beat=8;beat<=64;beat+=8){const a=dancerPose((beat-1e-5)*60/112),b=dancerPose((beat+1e-5)*60/112);for(const key of ['left','right'])for(const part of ['hands','elbows'])assert.ok(Math.hypot(...a[part][key].map((n,i)=>n-b[part][key][i]))<.001);assert.ok(Math.abs(Math.atan2(Math.sin(a.turn-b.turn),Math.cos(a.turn-b.turn)))<.001);}});
+
+test('every stage style settles both feet before changing figures, with no transition jumps',()=>{
+ for(let style=0;style<5;style++){
+  for(let beat=8;beat<=160;beat+=8){
+   const t=(beat-style*1.31)*60/112,a=dancerPose(t-1e-6,style),b=dancerPose(t+1e-6,style);
+   for(const side of ['left','right']){
+    assert.ok(Math.hypot(...a.feet[side].map((n,i)=>n-b.feet[side][i]))<.00001,'feet must not slide or teleport at a figure boundary');
+    assert.ok(a.feet[side][1]<.00001&&b.feet[side][1]<.00001);
+   }
+  }
+  for(let t=0;t<50;t+=.017){const p=dancerPose(t,style);assert.ok(Math.min(p.feet.left[1],p.feet.right[1])<1e-6,'at least one support foot must stay planted');}
+ }
+});

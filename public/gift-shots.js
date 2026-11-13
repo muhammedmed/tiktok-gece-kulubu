@@ -1,7 +1,7 @@
 // Priorities order waiting gifts only. A running gift always finishes first.
 export const GIFT_SHOTS=Object.freeze({
  waiter:{duration:6,priority:3},saz:{duration:8,priority:4},drum:{duration:8,priority:4},
- vip:{duration:8,priority:4},dj:{duration:8,priority:4},dancer:{duration:10,priority:5},
+ vip:{duration:8,priority:4},dj:{duration:8,priority:4},dancer:{duration:15,priority:5},
  solo:{duration:12,priority:5},hype:{duration:18,priority:6},money:{duration:6,priority:3},
  confetti:{duration:6,priority:3},dance:{duration:6,priority:2},
 });
