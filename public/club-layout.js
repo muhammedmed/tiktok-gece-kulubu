@@ -1,11 +1,11 @@
 // One capacity and layout definition shared by the server, dancers and stage.
 export const MAX_GUESTS=128;
-export const MAX_DANCERS=66;
+export const MAX_DANCERS=84;
 export const DANCE_IDLE_MS=150*1000;
 export const MAX_WAITING=100;
 export const ROOM={x:0,z:9,r:24};
 export const FLOOR={x:0,z:11,r:12.6};
-export const PAIR_CENTERS=[3,5,6,6,6,6,5,3].flatMap((count,row)=>
+export const PAIR_CENTERS=[3,5,6,7,7,6,5,3].flatMap((count,row)=>
  Array.from({length:count},(_,column)=>[(column-(count-1)/2)*3.3,.25+row*3.1])).slice(0,MAX_DANCERS/2);
 
 export const VIP_LOUNGES=[

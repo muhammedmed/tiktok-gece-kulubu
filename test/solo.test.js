@@ -30,7 +30,7 @@ test('12 second show cannot be cut or extended by other gifts; queued shows and 
  q.push(first,0);q.tick(0);q.push({...first},3);q.push({key:'solo:b',person:b,priority:5,locked:true,duration:SOLO_SECONDS},4);q.push({key:'vip:b',person:b,priority:4,immediate:true,duration:5},5);
  assert.equal(q.current.key,'solo:a');assert.equal(q.until,SOLO_SECONDS);assert.equal(q.items.length,2);q.tick(SOLO_SECONDS-.01);assert.equal(releases,0);q.tick(SOLO_SECONDS);assert.equal(releases,1);q.tick(SOLO_SECONDS+2);assert.equal(q.current.key,'solo:b');q.clear();assert.equal(q.current,null);
 });
-test('temporary circle fits a full 66-person floor without altering reserved slots',()=>{
+test('temporary circle fits a full 84-person floor without altering reserved slots',()=>{
  const slots=Array.from({length:MAX_DANCERS},(_,i)=>floorSpot(i)),before=JSON.stringify(slots);
  for(const slot of [0,19,40,MAX_DANCERS-1]){const center=soloCenter(slots[slot]),others=slots.filter((_,i)=>i!==slot),targets=soloClearance(others,center);
   for(const p of targets){assert.ok(Math.hypot(p.x-center.x,p.z-center.z)>=2.649);assert.ok(Math.hypot(p.x-FLOOR.x,p.z-FLOOR.z)<=FLOOR.r-.499);}

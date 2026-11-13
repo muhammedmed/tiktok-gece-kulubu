@@ -2,16 +2,16 @@
 // Identity and outfit remain stable when a guest changes role.
 export const guestModels = {
  "female": [
-  "female-party-02",
-  "female-adult-11",
-  "business-female-03",
-  "female-adult-02",
-  "female-adult-15",
-  "female-adult-03",
-  "female-adult-13",
-  "female-adult-17",
   "female-party-01",
-  "female-adult-08"
+  "female-party-02",
+  "female-adult-03",
+  "female-adult-11",
+  "female-adult-17",
+  "female-adult-01",
+  "female-adult-08",
+  "female-adult-13",
+  "female-adult-02",
+  "female-adult-15"
  ],
  "male": [
   "male-adult-08",

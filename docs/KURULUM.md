@@ -157,14 +157,14 @@ Repoyu indiren başka kişide sizin kamera videonuz görünmez. Her kullanıcı 
 
 ## 7. Müzik yükleme ve ses
 
-1. **5 · Yayın müziği → MP3 / ses dosyası** alanından dosyanızı seçin.
-2. Yükleme tamamlanınca müzik hazır olur; yayın penceresi açıkken çalmaya başlar.
-3. Ses seviyesini ayarlayın. Gerektiğinde panelde duraklatıp başlatabilirsiniz.
+1. **5 · Yayın müziği → Şarkıları ekle** alanından bir veya birden fazla dosya seçin. Sonradan ekledikleriniz mevcut listenin sonuna eklenir; çalan şarkı kesilmez veya başa sarılmaz.
+2. İlk şarkı yüklenince yayın penceresinde çalmaya başlar. Şarkılar listedeki sırayla çalar; son parçanın ardından ilkine dönerek devam eder. Tek şarkı varsa o şarkı tekrarlanır.
+3. Şarkı adları ve çalan parça panelde görünür. **↑ / ↓** ile sırayı değiştirin, **▶** ile istediğiniz parçayı hemen başlatın. **Önceki / Sonraki** ile parça değiştirin; **Duraklat / Başlat** ve ses seviyesiyle oynatmayı yönetin. **Kaldır** o şarkıyı listeden ve yerel müzik arşivinden çıkarır. Çalan şarkı kaldırılırsa sıradaki parça açılır.
 4. Yönetim ekranında da duymak istiyorsanız **Stüdyoda sesi dinle** seçeneğini açın. Yayın penceresi zaten ses çalıyorsa çift ses olmaması için bu seçeneği kapalı bırakın.
 
-Desteklenen yüklemeler MP3, WAV ve OGG; dosya sınırı 100 MiB'dir. Tarayıcının dosyayı çözebilmesi gerekir. **Tek yüklenen dosya döngüde çalar. Bu sürümde çoklu dosya/çalma listesi yoktur.** Yeni ses yüklemesi önceki dosyayı değiştirir ve yeni parçayı başlatır. Birkaç şarkıyı peş peşe döndürmek için bir ses düzenleyicide tek dosya olarak birleştirip yükleyin.
+Desteklenen yüklemeler MP3, WAV ve OGG; dosya başına sınır 100 MiB, liste sınırı 100 şarkıdır. Tarayıcının dosyayı çözebilmesi gerekir. Liste, sıra ve seçili şarkı bilgisayarınızda saklanır; uygulamayı yeniden açınca dosyaları yeniden yüklemeniz gerekmez. Önceki sürümde yüklü olan dosya ilk açılışta **Önceden yüklenen müzik** adıyla listeye alınır; eski dosya da korunur.
 
-Tarayıcı otomatik sesi engellerse temiz yayın penceresine bir kez tıklayın. Aynı yayın penceresini yenilemede aynı dosyanın son konumu oturum belleğinden geri alınmaya çalışılır; ayrı pencerelerin müzik konumları birebir senkron değildir. Yayın için tek ses çıkışı kullanın.
+Tarayıcı otomatik sesi engellerse temiz yayın penceresine bir kez tıklayın. Aynı yayın penceresini yenilemede aynı parçanın son konumu oturum belleğinden geri alınmaya çalışılır; ayrı pencerelerin müzik konumları birebir senkron değildir. Yayın için tek ses çıkışı kullanın. Aynı parça için birden fazla pencereden gelen bitiş bildirimi yalnızca bir kez ilerletir. Yayın penceresi veya stüdyo dinlemesi açıkken liste çalar; bütün ses pencereleri kapatılırsa şarkılar arka planda ilerlemez.
 
 Ses/video dosyaları sizin bilgisayarınızdaki `private/` klasöründe tutulur. GitHub'a eklenmez. Yalnızca yayınınızda kullanma hakkınız olan içerikleri yükleyin.
 
@@ -242,8 +242,8 @@ Kullanıcının **kalıcı rolü son istediği roldür**. Önce saz, sonra VIP a
 
 ### Kapasite ve 150 saniye kuralı
 
-- **Pistte en fazla 66 katılımcı** bulunur. Fazlası sıraya girer; en fazla 100 kişi bekleyebilir.
-- 4 VIP loca toplam 12 koltuktur. VIP, müzisyen, dansöz ve diğer roller pistteki 66 kişiden ayrıdır. Dekor NPC'leri de ekranda görünebilir; toplam görünen kişi sayısının 66'dan büyük olması pist sınırının aşıldığı anlamına gelmez.
+- **Pistte en fazla 84 katılımcı** bulunur. Fazlası sıraya girer; en fazla 100 kişi bekleyebilir.
+- 4 VIP loca toplam 12 koltuktur. VIP, müzisyen, dansöz ve diğer roller pistteki 84 kişiden ayrıdır. Dekor NPC'leri de ekranda görünebilir; toplam görünen kişi sayısının 84'ten büyük olması pist sınırının aşıldığı anlamına gelmez.
 - Ücretsiz pist katılımcısının sohbet, beğeni veya hediye etkileşimi aktiflik süresini yeniler.
 - 150 saniye etkileşim göstermeyen ücretsiz pist katılımcısı çıkarılır; bekleme sırası da temizlenir. Yer açılınca sıradaki kişi alınır.
 - VIP, müzisyen ve ücretli rol alanlar otomatik çıkarılmaz. Ücretli rol aldıktan sonra piste dönmüş kişi de korunur.
@@ -263,7 +263,8 @@ TikTok olayında profil fotoğrafı gelirse isim balonunda kullanılır; gelmez 
 | --- | --- |
 | `private/settings.json` | Hesap ayarları, Euler anahtarı, hediye/müzik/kamera ayarları |
 | `private/preferences.json` | Yayıncı hesabı ve kullanıcı kimliğine göre karakter tercihleri |
-| `private/music.bin` ve metadata | Son yüklenen ses dosyası |
+| `private/playlist.json` ve `private/music/` | Şarkı listesi, sırası, seçili parça ve yüklenen ses dosyaları |
+| `private/music.bin` ve metadata | Eski sürümden kalan, listeye geçerken korunan ses dosyası |
 | `private/video.bin` ve metadata | Son yüklenen kamera videosu |
 | `.env` | İsteğe bağlı yerel ortam ayarları |
 

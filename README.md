@@ -2,7 +2,7 @@
 
 TikTok LIVE sohbet ve hediyeleriyle çalışan, bilgisayarda yerel olarak açılan 3D gece kulübü. İzleyiciler `kadın` / `erkek` yazarak karakterini seçer, Gül göndererek veya 200 beğeniye ulaşarak piste katılır; hediyelerle VIP, müzisyen, DJ, garson ve dansöz rollerine geçer veya sahne efektleri başlatır. Kamera girişleri, rolleri ve gösterileri otomatik takip eder.
 
-**Pist kapasitesi 66 kişi.** VIP locaları, sahne rolleri ve dekor karakterleri bu pist sınırından ayrıdır. Her yayıncı kendi TikTok hesabını, Euler API anahtarını, müziğini ve kamera videosunu kullanır.
+**Pist kapasitesi 84 kişi.** VIP locaları, sahne rolleri ve dekor karakterleri bu pist sınırından ayrıdır. Her yayıncı kendi TikTok hesabını, Euler API anahtarını, müziğini ve kamera videosunu kullanır.
 
 ## İlk kez kuracaklar
 
@@ -40,6 +40,7 @@ Sunucu terminalini yayın boyunca açık tutun. `index.html` dosyasını çift t
 - Beğeni hedefi **200**; panelde değiştirilebilir veya **0** ile kapatılabilir. Yalnızca bağlantıya ulaşan kullanıcı beğenileri sayılır; TikTok bazı güncellemeleri iletmeyebilir.
 - Diğer hediyeler seçilene kadar kapalıdır; **Hediye → eylem** bölümünden belirlenir.
 - Webcam/video ve müzik hazır gelmez; kendi dosyalarınızı veya kameranızı eklersiniz.
+- Müzik paneline birden fazla MP3 ekleyebilirsiniz. Liste kaydedilir, sırayla çalar ve sonunda başa döner; yeni yüklemeler çalan parçayı kesmez.
 - Otomatik TikTok bağlantısı kapalı başlar. Sahne, yayın açılmadan yerel olarak denenebilir.
 
 ## Oyun akışı
@@ -63,7 +64,7 @@ Başlayan hediye gösterisi bitmeden yeni hediye veya sohbet kamerayı kesmez. B
 
 ## Müzik, güvenlik ve yayın hakkında
 
-Bu sürüm **tek ses dosyasını döngüde** çalar. Panelde çoklu dosyalı çalma listesi yoktur; yeni yükleme eskisini değiştirir. Birkaç şarkıyı sırayla döndürmek için önceden tek ses dosyasında birleştirip yükleyebilirsiniz. Kamera videosu sessiz ve döngülüdür.
+Panelde **kalıcı çalma listesi** vardır. MP3, WAV veya OGG dosyalarını birlikte seçebilir, sonradan yeni şarkılar ekleyebilir ve sırasını değiştirebilirsiniz. Liste sırayla çalar ve sonunda başa döner. Şarkı başına en fazla 100 MiB, listede en fazla 100 parça tutulur. Kamera videosu sessiz ve döngülüdür.
 
 TikTok olayları Euler üzerinden sunucuya, oradan açık oyun pencerelerine SSE ile iletilir. Uygulama TikTok yayın yetkisi sağlamaz ve **CANLI Yayın Yap** düğmesine basmaz. LIVE Studio'daki **İzleyici Dilekleri** ayarları bu panelden otomatik aktarılmaz; iki tarafta aynı hediyeleri seçin.
 

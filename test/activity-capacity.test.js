@@ -3,7 +3,7 @@ import {ClubSession} from '../src/session.js';
 import {DEFAULT_SETTINGS} from '../public/club-contract.js';
 import {MAX_DANCERS,MAX_VIP,DANCE_IDLE_MS,MAX_WAITING} from '../public/club-layout.js';
 function fixture(){let now=1000000;const session=new ClubSession({...DEFAULT_SETTINGS,handle:'host',chatJoin:true}, {},()=>now);session.mode='live';return {s:session,advance:ms=>now+=ms,join(id){session.accept({type:'chat',id:String(id),name:'Viewer '+id,text:'erkek'});}};}
-test('66 people fit; overflow waits FIFO, duplicates retain their position, new activity preserves its person',()=>{
+test('84 people fit; overflow waits FIFO, duplicates retain their position, new activity preserves its person',()=>{
  const {s,advance,join}=fixture();for(let i=0;i<MAX_DANCERS;i++)join(i);
  advance(DANCE_IDLE_MS-60000);join('next');join('last');join('next');assert.equal(s.waitlist.size,2);assert.equal(s.players.size,MAX_DANCERS);
  advance(60000);s.accept({type:'chat',id:'0',name:'Viewer 0',text:'buradayım'});

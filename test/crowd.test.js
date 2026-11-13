@@ -3,8 +3,8 @@ import test from 'node:test';import assert from 'node:assert/strict';import * as
 import {MAX_GUESTS,MAX_DANCERS,FrameClock,freeDanceSlot,freeSeat,crowdBudget,animationInterval} from '../public/crowd.js';
 import {floorSpot} from '../public/dance-motion.js';
 import {appearanceVariant,sharedMaterial} from '../public/appearance.js';
-test('crowd reserves 66 distinct dance slots including incoming guests',()=>{
- assert.equal(MAX_DANCERS,66);const people=[];for(let i=0;i<MAX_DANCERS;i++){assert.equal(freeDanceSlot(people),i);const spot=floorSpot(i);people.push({role:i%2?'dance':'table',walking:i%2===0,destinationRole:'dance',danceSlot:i,root:{position:spot},path:[spot]});}
+test('crowd reserves 84 distinct dance slots including incoming guests',()=>{
+ assert.equal(MAX_DANCERS,84);const people=[];for(let i=0;i<MAX_DANCERS;i++){assert.equal(freeDanceSlot(people),i);const spot=floorSpot(i);people.push({role:i%2?'dance':'table',walking:i%2===0,destinationRole:'dance',danceSlot:i,root:{position:spot},path:[spot]});}
  assert.equal(freeDanceSlot(people),null);assert.equal(freeDanceSlot(people,people[15]),15);assert.equal(floorSpot(MAX_DANCERS),null);assert.equal(MAX_GUESTS,128);
 });
 test('incoming seated guests reserve their destination rather than their departure point',()=>{

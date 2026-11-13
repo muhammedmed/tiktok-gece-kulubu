@@ -1,16 +1,11 @@
 import {ROLE_LABELS} from './club-contract.js';
 import {MAX_DANCERS} from './club-layout.js';
-import {resumePosition} from './music-resume.js';
+import {setupMusicPlaylist} from './music-playlist.js';
 import {isOlderState} from './state-order.js';
 const $=id=>document.getElementById(id),broadcast=location.pathname==='/overlay';
 export function setupStudio(onState){
- let state,lastSettings='',cameraSignature='',mediaStream,noticeTimer,musicVersion=0,monitor=false,applying=false;
- const catalog=new Map(),selections=new Map(),music=new Audio();music.loop=true;
- const resumeKey='ala-music-resume';let loadedMusicVersion=0,lastMusicSave=0;
- function saveMusicPosition(){if(!broadcast||loadedMusicVersion!==musicVersion||!musicVersion||music.readyState<1)return;try{sessionStorage.setItem(resumeKey,JSON.stringify({version:musicVersion,position:music.currentTime,savedAt:Date.now()}));}catch{}}
- music.addEventListener('timeupdate',()=>{if(Date.now()-lastMusicSave>1000){saveMusicPosition();lastMusicSave=Date.now();}});
- window.addEventListener('pagehide',saveMusicPosition);window.addEventListener('beforeunload',saveMusicPosition);
- music.addEventListener('loadedmetadata',()=>{loadedMusicVersion=musicVersion;let saved;try{saved=JSON.parse(sessionStorage.getItem(resumeKey));}catch{}if(broadcast)music.currentTime=resumePosition(saved,musicVersion,music.duration);applyMusic();});
+ let state,lastSettings='',cameraSignature='',mediaStream,noticeTimer;
+ const catalog=new Map(),selections=new Map(),playlist=setupMusicPlaylist({control,save,broadcast});
  async function control(body){try{const r=await fetch('/api/control',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}),s=await r.json();if(!r.ok)throw Error(s.error);receive(s);return true;}catch(e){$('studioStatus').textContent=e.message;return false;}}
  async function save(part,key){return control({action:'settings',settings:{...state.settings,...part},...(key?{key}:{})});}
  function fillGifts(){for(const [role,select]of selections){const chosen=select.value||state?.settings.assignments[role]?.id||'',query=$('giftSearch').value.toLocaleLowerCase('tr');select.replaceChildren(new Option('Eşleştirilmedi · kapalı',''));for(const [id,g]of [...catalog].sort((a,b)=>a[1].name.localeCompare(b[1].name,'tr'))){if(query&&!g.name.toLocaleLowerCase('tr').includes(query)&&id!==chosen)continue;select.append(new Option(g.name+' · #'+id+(g.coins?' · '+g.coins+' jeton':''),id));}select.value=chosen;}}
@@ -23,8 +18,7 @@ export function setupStudio(onState){
  $('saveCharacterRules').onclick=()=>save({defaultGender:$('defaultGender').value,chatJoin:$('chatJoin').checked,likeJoinCount:Number($('likeJoinCount').value)});
  $('saveCamera').onclick=async()=>{if(await save({cameraMode:$('cameraMode').value,cameraSize:Number($('cameraSize').value)}))$('cameraStatus').textContent='Kamera ayarı yayın penceresine uygulandı.';};
  async function upload(input,kind){const file=input.files[0];if(!file)return;$('studioStatus').textContent='Dosya yükleniyor…';try{const r=await fetch('/api/upload/'+kind,{method:'POST',headers:{'Content-Type':file.type|| (kind==='music'?'audio/mpeg':'video/mp4')},body:file}),data=await r.json();if(!r.ok)throw Error(data.error);$('studioStatus').textContent='Dosya kaydedildi; yayın pencerelerinde kullanılabilir.';}catch(e){$('studioStatus').textContent=e.message;}input.value='';}
- $('cameraFile').onchange=()=>upload($('cameraFile'),'video');$('musicFile').onchange=()=>upload($('musicFile'),'music');
- $('musicToggle').onclick=()=>save({musicPlaying:!state.settings.musicPlaying});$('volume').onchange=()=>save({musicVolume:Number($('volume').value)});$('monitorMusic').onchange=()=>{monitor=$('monitorMusic').checked;applyMusic();};
+ $('cameraFile').onchange=()=>upload($('cameraFile'),'video');
  document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>control({action:'test',name:$('guestName').value,gender:$('gender').value,role:b.dataset.action}));
  $('testCharacterChat').onclick=()=>control({action:'testChat',name:$('guestName').value,text:$('characterChat').value});$('resetPreview').onclick=()=>control({action:'preview'});
  $('broadcastUrl').value=location.origin+'/overlay?studio=tiktok';
@@ -32,16 +26,15 @@ export function setupStudio(onState){
  async function applyCamera(settings){const signature=settings.cameraMode+':'+settings.videoVersion;$('broadcastCorner').style.width=settings.cameraSize+'vw';if(signature===cameraSignature)return;cameraSignature=signature;mediaStream?.getTracks().forEach(t=>t.stop());mediaStream=null;const v=$('webcamVideo');v.pause();v.srcObject=null;v.removeAttribute('src');$('webcamBox').hidden=true;
   try{if(settings.cameraMode==='video'&&settings.videoVersion){v.src='/media/video?v='+settings.videoVersion;v.muted=true;v.loop=true;await v.play();$('webcamBox').hidden=false;}else if(settings.cameraMode==='webcam'){mediaStream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:480}},audio:false});if(cameraSignature!==signature){mediaStream.getTracks().forEach(t=>t.stop());return;}v.srcObject=mediaStream;v.muted=true;await v.play();$('webcamBox').hidden=false;}}catch{$('cameraStatus').textContent='Kamera açılamadı. Tarayıcı kamera iznini ve video dosyasını kontrol et.';}
  }
- function applyMusic(){const s=state.settings;music.volume=s.musicVolume;if(s.musicVersion&&musicVersion!==s.musicVersion){musicVersion=s.musicVersion;loadedMusicVersion=0;music.src='/media/music?v='+musicVersion;}if(s.musicPlaying&&musicVersion&&(broadcast||monitor)&&music.readyState>=1)music.play().catch(()=>{$('studioStatus').textContent='Tarayıcı sesi engelledi. Yayın penceresine bir kez tıkla.';});else music.pause();$('musicToggle').textContent=s.musicVersion?(s.musicPlaying?'Müziği duraklat':'Müziği başlat'):'Önce müzik yükle';$('musicToggle').disabled=!s.musicVersion;}
- document.addEventListener('pointerdown',()=>{if(state)applyMusic();});
  function receive(s){if(isOlderState(s,state))return;state=s;const st=s.settings;const signature=JSON.stringify(st);if(signature!==lastSettings){lastSettings=signature;for(const g of Object.values(st.assignments))catalog.set(g.id,{...catalog.get(g.id),...g});fillGifts();for(const [role,select]of selections)select.value=st.assignments[role]?.id||'';
   $('liveHandle').value=st.handle;$('autoConnect').checked=st.autoConnect;$('defaultGender').value=st.defaultGender;$('chatJoin').checked=st.chatJoin;$('likeJoinCount').value=st.likeJoinCount??200;$('cameraMode').value=st.cameraMode;$('cameraSize').value=st.cameraSize;$('volume').value=st.musicVolume;
   const entry=st.assignments.dance,entryGuide=$('entryGift'),likeTarget=st.likeJoinCount??200;
   entryGuide.hidden=st.chatJoin||(!entry&&!likeTarget);
   const ways=[...(entry?[entry.id==='5655'?'🌹 Gül':'🎁 '+entry.name]:[]),...(likeTarget?[likeTarget+' beğeni']:[])];
   entryGuide.textContent='Piste çık · '+ways.join(' veya ');
-  $('joinHint').querySelector('strong').textContent=st.chatJoin?'Ücretsiz piste çık':'Karakterini seç';applyCamera(st);applyMusic();
+  $('joinHint').querySelector('strong').textContent=st.chatJoin?'Ücretsiz piste çık':'Karakterini seç';applyCamera(st);
  }
+ playlist.receive(s);
  $('floorStatus').textContent='Pist: '+s.players.filter(p=>p.role==='dance').length+'/'+(s.capacity?.floor||MAX_DANCERS)+' · Sırada: '+(s.waiting?.length||0);
  $('keyStatus').textContent=s.configured?'Anahtar sunucuda kayıtlı; tarayıcıya geri gönderilmez.':'Euler anahtarı henüz kaydedilmedi.';$('liveKey').placeholder=s.configured?'Değiştirmek için yeni anahtar gir':'Anahtarını gir';$('studioStatus').textContent=s.link.detail;$('connectionBadge').textContent=s.link.status==='live'?'TIKTOK BAĞLI':s.mode==='preview'?'ÖNİZLEME':s.mode==='test'?'YEREL TEST':'YAYIN BEKLENİYOR';
  const likeList=$('likeProgressList');likeList.replaceChildren();

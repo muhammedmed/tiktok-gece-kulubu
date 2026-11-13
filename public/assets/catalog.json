@@ -39,23 +39,22 @@
       "animationSet": "f"
     },
     {
-      "slug": "business-female-03",
-      "title": "Businesswoman 03",
+      "slug": "female-adult-01",
+      "title": "Female Adult 01",
       "category": "Characters",
-      "collection": "rigged-professions",
+      "collection": "rigged-adults",
       "license": "mit",
-      "glb": "/models/business-female-03.glb",
-      "bytes": 845076,
-      "thumb": "/thumbs/business-female-03.webp",
-      "triangles": 8438,
+      "glb": "/models/female-adult-01.glb",
+      "bytes": 1028404,
+      "thumb": "/thumbs/female-adult-01.webp",
+      "triangles": 8732,
       "size": [
         1.217,
         1.743,
-        0.315
+        0.376
       ],
       "rigged": true,
       "gender": "female",
-      "role": "Business",
       "animationSet": "f"
     },
     {

@@ -8,7 +8,7 @@ Microsoft Rocketbox — Copyright (c) 2020 Microsoft, **MIT**.
 - GLB dönüşümleri ve dağıtım: https://models.codelove.in/
 - Dağıtım lisans sayfası: https://models.codelove.in/license/
 - Lisans metni: [CHARACTER-LICENSE.txt](CHARACTER-LICENSE.txt). Ayrıca indirilmiş GLB dosyalarının `asset.extras.licenseText` alanında korunmuştur.
-- Aktif modeller: female-party-02, female-adult-11, business-female-03, female-adult-02, female-adult-15, female-adult-03, female-adult-13, female-adult-17, female-party-01, female-adult-08, male-adult-08, male-adult-11, male-adult-09, male-adult-12, male-adult-04, male-adult-02, male-adult-07, male-adult-10, male-adult-16, male-adult-20, business-male-06. Diğer eski dosyalar yüklenmez.
+- Aktif modeller: female-party-02, female-adult-11, female-adult-01, female-adult-02, female-adult-15, female-adult-03, female-adult-13, female-adult-17, female-party-01, female-adult-08, male-adult-08, male-adult-11, male-adult-09, male-adult-12, male-adult-04, male-adult-02, male-adult-07, male-adult-10, male-adult-16, male-adult-20, business-male-06. Diğer eski dosyalar yüklenmez.
 - Kullanılan kadın/erkek animasyonları: Idle, Dance, Walk, Clap, Cheer.
 - Tam model bilgileri `public/assets/catalog.json` içinde.
 
@@ -24,7 +24,7 @@ Three.js 0.185.1 — MIT; npm paketinin LICENSE dosyasına bakın.
 
 Pistte 10 kadın ve 10 erkek görünümü dönüşümlü seçilir. Kadın seçkisinde kısa elbise, şort, etek ve pantolonlu gece kombinleri vardır. Sonradan eklenen uzun pembe etek geometrileri kaldırıldı; kıyafetler kaynak modelin kendi iskeletli geometrisini kullanır. Erkeklerde gömlek, tişört, denim/deri ceket ve spor üstler çeşitlenir. Garsonun beyaz gömlekli modeli ayrıdır. Modeller MIT lisanslıdır; fotogerçekçi tarama değildir.
 
-Saç boyası, ruj/far/allık ve kıyafet renkleri `public/appearance.js` içindeki GLSL katmanlarıyla uygulanır. Yeni modellerin UV atlasları ayrıca incelendi; üst giysi renkleri çıplak kol, boyun, ayakkabı ve denimden ayrılır. Erkeklerde gri saç paleti kaldırıldı. Alın ve yanakta hafif doku yumuşatma, gece üstlerinde kumaş parıltısı vardır. Kaynak GLB dokuları değiştirilmez. Saç kartı kabuğu 2,5 mm genişletilir; ek iskelet veya fizik simülasyonu eklenmez.
+Saç boyası, ruj/far/allık ve kıyafet renkleri `public/appearance.js` içindeki GLSL katmanlarıyla uygulanır. Kadın pist karakterlerinin seçimi ve görünümü 20'li yaşlarda yetişkin bir kulüp tarzına göre düzenlenmiştir: kısa elbise/etek, askılı saten üst, şort ve koyu denim kombinleri önceliklidir. `public/club-fashion.js` altı uyumlu saç, makyaj ve kıyafet paleti ile modele özel üst/alt/çizme bölgelerini tanımlar. Üst ve pantolon ayrı renklenir; ten bölgeleri korunur. Kumaşlardaki eski desenler ve aşırı parlama azaltılır. Yakın çekimde alın, yanak ve göz altı gölgeleri hafif yumuşatılır; göz, kaş ve dudak ayrıntıları korunur. Erkeklerde gri saç paleti kaldırıldı. Kaynak GLB dokuları değiştirilmez. Saç kartı kabuğu 2,5 mm genişletilir; ek iskelet veya fizik simülasyonu eklenmez. Malzemeler aynı altı görünüm havuzunda paylaşılır.
 
 ## Ankara oyun havası hareket referansları
 
